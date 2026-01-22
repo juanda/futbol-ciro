@@ -326,6 +326,8 @@ const setCoins = (value, delta = 0) => {
   if (coinDelta) coinDelta.textContent = delta ? `${delta > 0 ? "+" : ""}${delta}` : "";
 };
 
+const clampValue = (value, min, max) => Math.max(min, Math.min(max, value));
+
 const calcPrice = (rating) => {
   const minRating = 55;
   const maxRating = 115;
@@ -437,8 +439,6 @@ marketInputPos?.addEventListener("input", (event) => {
 renderMarket();
 
 let activeDrag = null;
-
-const clampValue = (value, min, max) => Math.max(min, Math.min(max, value));
 
 const updatePlayerPosition = (playerId, pitchRect, cardRect, clientX, clientY) => {
   const minX = pitchRect.left + cardRect.width / 2;
