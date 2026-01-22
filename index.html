@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FC Mobile - Inicio</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="screen">
+      <header class="top">
+        <div class="brand">
+          <span class="brand-title">FC Mobile</span>
+          <span class="brand-sub">Tu plantilla</span>
+        </div>
+        <div class="coin-display">
+          <span class="coin-icon"></span>
+          <span class="coin-amount" id="coin-amount">200</span>
+          <span class="coin-delta" id="coin-delta"></span>
+        </div>
+      </header>
+
+      <main class="content screen-main" id="home-screen">
+        <section class="pitch-wrap">
+          <div class="pitch">
+            <div class="player p1" data-player="p1" data-rating="83"><span class="pos-text">POR</span><br /><small>83</small></div>
+            <div class="player p2" data-player="p2" data-rating="81"><span class="pos-text">LI</span><br /><small>81</small></div>
+            <div class="player p3" data-player="p3" data-rating="84"><span class="pos-text">DFC</span><br /><small>84</small></div>
+            <div class="player p4" data-player="p4" data-rating="82"><span class="pos-text">DFC</span><br /><small>82</small></div>
+            <div class="player p5" data-player="p5" data-rating="80"><span class="pos-text">LD</span><br /><small>80</small></div>
+            <div class="player p6" data-player="p6" data-rating="85"><span class="pos-text">MCD</span><br /><small>85</small></div>
+            <div class="player p7" data-player="p7" data-rating="86"><span class="pos-text">MC</span><br /><small>86</small></div>
+            <div class="player p8" data-player="p8" data-rating="87"><span class="pos-text">MCO</span><br /><small>87</small></div>
+            <div class="player p9" data-player="p9" data-rating="88"><span class="pos-text">EI</span><br /><small>88</small></div>
+            <div class="player p10" data-player="p10" data-rating="90"><span class="pos-text">DC</span><br /><small>90</small></div>
+            <div class="player p11" data-player="p11" data-rating="88"><span class="pos-text">ED</span><br /><small>88</small></div>
+          </div>
+        </section>
+
+        <section class="menu">
+          <button
+            class="menu-btn"
+            id="play-btn"
+            onclick="document.getElementById('play-screen').classList.remove('screen-hidden'); document.getElementById('home-screen').classList.add('screen-hidden'); window.scrollTo(0,0);"
+          >
+            Jugar
+          </button>
+          <button
+            class="menu-btn"
+            id="formation-btn"
+            onclick="document.getElementById('formation-screen').classList.remove('screen-hidden'); document.getElementById('home-screen').classList.add('screen-hidden'); window.scrollTo(0,0);"
+          >
+            Formacion
+          </button>
+          <button class="menu-btn">Tienda</button>
+          <button
+            class="menu-btn"
+            id="club-btn"
+            onclick="document.getElementById('club-screen').classList.remove('screen-hidden'); document.getElementById('home-screen').classList.add('screen-hidden'); window.scrollTo(0,0);"
+          >
+            Club
+          </button>
+          <button
+            class="menu-btn"
+            id="market-btn"
+            onclick="document.getElementById('market-screen').classList.remove('screen-hidden'); document.getElementById('home-screen').classList.add('screen-hidden'); window.scrollTo(0,0);"
+          >
+            Mercado
+          </button>
+          <button class="menu-btn">Dorsales</button>
+          <button class="menu-btn">Valoracion</button>
+          <button class="menu-btn">Plantilla</button>
+        </section>
+      </main>
+
+      <main class="content screen-main screen-hidden" id="play-screen">
+        <section class="rivals">
+          <div class="rivals-header">
+            <h2>Elige rival</h2>
+            <button
+              class="menu-btn small"
+              id="back-btn"
+              onclick="document.getElementById('home-screen').classList.remove('screen-hidden'); document.getElementById('play-screen').classList.add('screen-hidden'); window.scrollTo(0,0);"
+            >
+              Volver
+            </button>
+          </div>
+
+          <div class="pitch-wrap">
+            <div class="pitch play-pitch">
+              <div class="rivals-pyramid">
+                <div class="rival-card hard top" data-name="Dragones FC" data-difficulty="hard" data-rating="89" data-coins="5000">
+                  <div class="rival-shield shield-a"></div>
+                  Dragones FC<br /><small>89</small>
+                  <div class="rival-coins">5,000</div>
+                </div>
+                <div class="rival-card medium mid-left" data-name="Halcones Norte" data-difficulty="medium" data-rating="83" data-coins="2000">
+                  <div class="rival-shield shield-b"></div>
+                  Halcones Norte<br /><small>83</small>
+                  <div class="rival-coins">2,000</div>
+                </div>
+                <div class="rival-card medium mid-right" data-name="Titanes Azul" data-difficulty="medium" data-rating="85" data-coins="2000">
+                  <div class="rival-shield shield-c"></div>
+                  Titanes Azul<br /><small>85</small>
+                  <div class="rival-coins">2,000</div>
+                </div>
+                <div class="rival-card easy bottom-left" data-name="Lobos del Sur" data-difficulty="easy" data-rating="74" data-coins="1000">
+                  <div class="rival-shield shield-d"></div>
+                  Lobos del Sur<br /><small>74</small>
+                  <div class="rival-coins">1,000</div>
+                </div>
+                <div class="rival-card easy bottom-center" data-name="Cometas FC" data-difficulty="easy" data-rating="75" data-coins="1000">
+                  <div class="rival-shield shield-e"></div>
+                  Cometas FC<br /><small>75</small>
+                  <div class="rival-coins">1,000</div>
+                </div>
+                <div class="rival-card easy bottom-right" data-name="Rayos City" data-difficulty="easy" data-rating="76" data-coins="1000">
+                  <div class="rival-shield shield-f"></div>
+                  Rayos City<br /><small>76</small>
+                  <div class="rival-coins">1,000</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="result-panel screen-hidden" id="result-win">
+            <div class="result-card win">
+              <h3>Ganas</h3>
+              <p class="result-rival" id="win-rival">Rival</p>
+              <div class="result-bars">
+                <div class="result-side">
+                  <span>Tu equipo</span>
+                  <strong id="win-left">50%</strong>
+                </div>
+                <div class="result-side">
+                  <span>Rival</span>
+                  <strong id="win-right">50%</strong>
+                </div>
+              </div>
+              <div class="result-reward" id="win-reward"></div>
+              <button class="menu-btn small result-close">Cerrar</button>
+            </div>
+          </div>
+
+          <div class="result-panel screen-hidden" id="result-draw">
+            <div class="result-card draw">
+              <h3>Empate</h3>
+              <p class="result-rival" id="draw-rival">Rival</p>
+              <div class="result-bars">
+                <div class="result-side">
+                  <span>Tu equipo</span>
+                  <strong id="draw-left">50%</strong>
+                </div>
+                <div class="result-side">
+                  <span>Rival</span>
+                  <strong id="draw-right">50%</strong>
+                </div>
+              </div>
+              <div class="result-reward" id="draw-reward"></div>
+              <button class="menu-btn small result-close">Cerrar</button>
+            </div>
+          </div>
+
+          <div class="result-panel screen-hidden" id="result-lose">
+            <div class="result-card lose">
+              <h3>Pierdes</h3>
+              <p class="result-rival" id="lose-rival">Rival</p>
+              <div class="result-bars">
+                <div class="result-side">
+                  <span>Tu equipo</span>
+                  <strong id="lose-left">50%</strong>
+                </div>
+                <div class="result-side">
+                  <span>Rival</span>
+                  <strong id="lose-right">50%</strong>
+                </div>
+              </div>
+              <div class="result-reward" id="lose-reward"></div>
+              <button class="menu-btn small result-close">Cerrar</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <main class="content screen-main screen-hidden" id="formation-screen">
+        <section class="formations">
+          <div class="rivals-header">
+            <h2>Formacion</h2>
+            <button
+              class="menu-btn small"
+              id="formation-back"
+              onclick="document.getElementById('home-screen').classList.remove('screen-hidden'); document.getElementById('formation-screen').classList.add('screen-hidden'); window.scrollTo(0,0);"
+            >
+              Volver
+            </button>
+          </div>
+
+          <div class="pitch-wrap">
+            <div class="pitch formation-pitch">
+              <div class="player p1" data-player="p1" data-rating="83"><span class="pos-text">POR</span><br /><small>83</small></div>
+              <div class="player p2" data-player="p2" data-rating="81"><span class="pos-text">LI</span><br /><small>81</small></div>
+              <div class="player p3" data-player="p3" data-rating="84"><span class="pos-text">DFC</span><br /><small>84</small></div>
+              <div class="player p4" data-player="p4" data-rating="82"><span class="pos-text">DFC</span><br /><small>82</small></div>
+              <div class="player p5" data-player="p5" data-rating="80"><span class="pos-text">LD</span><br /><small>80</small></div>
+              <div class="player p6" data-player="p6" data-rating="85"><span class="pos-text">MCD</span><br /><small>85</small></div>
+              <div class="player p7" data-player="p7" data-rating="86"><span class="pos-text">MC</span><br /><small>86</small></div>
+              <div class="player p8" data-player="p8" data-rating="87"><span class="pos-text">MCO</span><br /><small>87</small></div>
+              <div class="player p9" data-player="p9" data-rating="88"><span class="pos-text">EI</span><br /><small>88</small></div>
+              <div class="player p10" data-player="p10" data-rating="90"><span class="pos-text">DC</span><br /><small>90</small></div>
+              <div class="player p11" data-player="p11" data-rating="88"><span class="pos-text">ED</span><br /><small>88</small></div>
+            </div>
+          </div>
+
+          <div class="formation-list">
+            <button class="menu-btn formation-btn" data-formation="433">4-3-3</button>
+            <button class="menu-btn formation-btn" data-formation="442">4-4-2</button>
+            <button class="menu-btn formation-btn" data-formation="352">3-5-2</button>
+          </div>
+
+          <p class="formation-note" id="formation-note">Elige una formacion y muevo las fichas.</p>
+        </section>
+      </main>
+
+      <main class="content screen-main screen-hidden" id="club-screen">
+        <section class="club">
+          <div class="rivals-header">
+            <h2>Club</h2>
+            <button
+              class="menu-btn small"
+              id="club-back"
+              onclick="document.getElementById('home-screen').classList.remove('screen-hidden'); document.getElementById('club-screen').classList.add('screen-hidden'); window.scrollTo(0,0);"
+            >
+              Volver
+            </button>
+          </div>
+
+          <div class="club-list" id="club-list"></div>
+        </section>
+      </main>
+
+      <main class="content screen-main screen-hidden" id="market-screen">
+        <section class="market">
+          <div class="rivals-header">
+            <h2>Mercado</h2>
+            <button
+              class="menu-btn small"
+              id="market-back"
+              onclick="document.getElementById('home-screen').classList.remove('screen-hidden'); document.getElementById('market-screen').classList.add('screen-hidden'); window.scrollTo(0,0);"
+            >
+              Volver
+            </button>
+          </div>
+
+          <div class="market-filters">
+            <button class="menu-btn small market-sort" data-sort="name">Nombre</button>
+            <button class="menu-btn small market-sort" data-sort="club">Club</button>
+            <button class="menu-btn small market-sort" data-sort="pos">Posicion</button>
+          </div>
+
+          <div class="market-inputs">
+            <input class="market-input screen-hidden" id="market-input-name" type="text" placeholder="Buscar por nombre" />
+            <input class="market-input screen-hidden" id="market-input-club" type="text" placeholder="Buscar por club" />
+            <input class="market-input screen-hidden" id="market-input-pos" type="text" placeholder="Buscar por posicion" />
+          </div>
+
+          <div class="market-list" id="market-list"></div>
+          <p class="market-note" id="market-note"></p>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
