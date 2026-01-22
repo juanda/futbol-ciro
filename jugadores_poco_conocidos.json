@@ -1,0 +1,402 @@
+[
+    {
+        "nombre": "Quique Serrano",
+        "valoracion": 55
+    },
+    {
+        "nombre": "Fabian Tapia",
+        "valoracion": 41
+    },
+    {
+        "nombre": "Jaime Mendoza",
+        "valoracion": 49
+    },
+    {
+        "nombre": "Noe Gallardo",
+        "valoracion": 41
+    },
+    {
+        "nombre": "Kevin Herrera",
+        "valoracion": 49
+    },
+    {
+        "nombre": "Nicolas Iniesta",
+        "valoracion": 36
+    },
+    {
+        "nombre": "Kiko Sanchez",
+        "valoracion": 35
+    },
+    {
+        "nombre": "Mateo Yanez",
+        "valoracion": 54
+    },
+    {
+        "nombre": "Quique Escobar",
+        "valoracion": 51
+    },
+    {
+        "nombre": "Oliver Flores",
+        "valoracion": 37
+    },
+    {
+        "nombre": "Lucas Perez",
+        "valoracion": 45
+    },
+    {
+        "nombre": "Bruno Ferrer",
+        "valoracion": 40
+    },
+    {
+        "nombre": "Zaid Iglesias",
+        "valoracion": 51
+    },
+    {
+        "nombre": "Lucas Lopez",
+        "valoracion": 32
+    },
+    {
+        "nombre": "Yan Gallardo",
+        "valoracion": 40
+    },
+    {
+        "nombre": "Zaid Ybarra",
+        "valoracion": 48
+    },
+    {
+        "nombre": "Lucas Castillo",
+        "valoracion": 34
+    },
+    {
+        "nombre": "Oscar Zuniga",
+        "valoracion": 40
+    },
+    {
+        "nombre": "Iker Alvarez",
+        "valoracion": 48
+    },
+    {
+        "nombre": "Rafael Julian",
+        "valoracion": 32
+    },
+    {
+        "nombre": "Nicolas Ybarra",
+        "valoracion": 53
+    },
+    {
+        "nombre": "Gonzalo Vargas",
+        "valoracion": 41
+    },
+    {
+        "nombre": "Brais Valdez",
+        "valoracion": 43
+    },
+    {
+        "nombre": "Victor Torres",
+        "valoracion": 37
+    },
+    {
+        "nombre": "Willy Rodriguez",
+        "valoracion": 49
+    },
+    {
+        "nombre": "Antonio Zabala",
+        "valoracion": 51
+    },
+    {
+        "nombre": "Uriel Rivas",
+        "valoracion": 34
+    },
+    {
+        "nombre": "Nicolas Quintero",
+        "valoracion": 39
+    },
+    {
+        "nombre": "Jaime Rivas",
+        "valoracion": 46
+    },
+    {
+        "nombre": "Antonio Rodriguez",
+        "valoracion": 57
+    },
+    {
+        "nombre": "Tomas Yanez",
+        "valoracion": 40
+    },
+    {
+        "nombre": "Jaime Laguna",
+        "valoracion": 47
+    },
+    {
+        "nombre": "Xavier Serrano",
+        "valoracion": 39
+    },
+    {
+        "nombre": "Bruno Velazquez",
+        "valoracion": 55
+    },
+    {
+        "nombre": "Luis Quintana",
+        "valoracion": 42
+    },
+    {
+        "nombre": "Quique Estrada",
+        "valoracion": 43
+    },
+    {
+        "nombre": "Mateo Ybarra",
+        "valoracion": 48
+    },
+    {
+        "nombre": "Marcos Ybarra",
+        "valoracion": 54
+    },
+    {
+        "nombre": "Antonio Delgado",
+        "valoracion": 58
+    },
+    {
+        "nombre": "Sergio Torres",
+        "valoracion": 36
+    },
+    {
+        "nombre": "Iker Gonzalez",
+        "valoracion": 51
+    },
+    {
+        "nombre": "Nicolas Benitez",
+        "valoracion": 57
+    },
+    {
+        "nombre": "Jaime Flores",
+        "valoracion": 53
+    },
+    {
+        "nombre": "Esteban Orozco",
+        "valoracion": 49
+    },
+    {
+        "nombre": "Marcos Laguna",
+        "valoracion": 51
+    },
+    {
+        "nombre": "Brais Lopez",
+        "valoracion": 44
+    },
+    {
+        "nombre": "Diego Jimenez",
+        "valoracion": 50
+    },
+    {
+        "nombre": "Quique Herrera",
+        "valoracion": 42
+    },
+    {
+        "nombre": "Hernan Ybarra",
+        "valoracion": 46
+    },
+    {
+        "nombre": "Brais Rodriguez",
+        "valoracion": 31
+    },
+    {
+        "nombre": "Willy Ortega",
+        "valoracion": 37
+    },
+    {
+        "nombre": "Nicolas Urrutia",
+        "valoracion": 57
+    },
+    {
+        "nombre": "Bruno Tapia",
+        "valoracion": 52
+    },
+    {
+        "nombre": "Hugo Rodriguez",
+        "valoracion": 56
+    },
+    {
+        "nombre": "Diego Ximenez",
+        "valoracion": 30
+    },
+    {
+        "nombre": "Oliver Torres",
+        "valoracion": 31
+    },
+    {
+        "nombre": "Jaime Ulloa",
+        "valoracion": 40
+    },
+    {
+        "nombre": "Fernando Jimenez",
+        "valoracion": 50
+    },
+    {
+        "nombre": "Quique Pacheco",
+        "valoracion": 30
+    },
+    {
+        "nombre": "Uriel Perez",
+        "valoracion": 39
+    },
+    {
+        "nombre": "Diego Navarro",
+        "valoracion": 42
+    },
+    {
+        "nombre": "Marcos Rodriguez",
+        "valoracion": 48
+    },
+    {
+        "nombre": "Uriel Julian",
+        "valoracion": 30
+    },
+    {
+        "nombre": "Yan Estrada",
+        "valoracion": 35
+    },
+    {
+        "nombre": "Esteban Serrano",
+        "valoracion": 45
+    },
+    {
+        "nombre": "Lucas Hernandez",
+        "valoracion": 49
+    },
+    {
+        "nombre": "Daniel Benitez",
+        "valoracion": 38
+    },
+    {
+        "nombre": "Uriel Rodriguez",
+        "valoracion": 54
+    },
+    {
+        "nombre": "Mateo Quintero",
+        "valoracion": 54
+    },
+    {
+        "nombre": "Nicolas Escobar",
+        "valoracion": 46
+    },
+    {
+        "nombre": "Valentin Julian",
+        "valoracion": 38
+    },
+    {
+        "nombre": "Ezequiel Sanchez",
+        "valoracion": 38
+    },
+    {
+        "nombre": "Sergio Tapia",
+        "valoracion": 46
+    },
+    {
+        "nombre": "Ezequiel Iglesias",
+        "valoracion": 47
+    },
+    {
+        "nombre": "Ezequiel Herrera",
+        "valoracion": 60
+    },
+    {
+        "nombre": "Oliver Quintana",
+        "valoracion": 32
+    },
+    {
+        "nombre": "Hernan Estrada",
+        "valoracion": 44
+    },
+    {
+        "nombre": "Kevin Mendoza",
+        "valoracion": 32
+    },
+    {
+        "nombre": "Sergio Delgado",
+        "valoracion": 59
+    },
+    {
+        "nombre": "Diego Yanez",
+        "valoracion": 31
+    },
+    {
+        "nombre": "Brais Pacheco",
+        "valoracion": 59
+    },
+    {
+        "nombre": "Nicolas Pacheco",
+        "valoracion": 40
+    },
+    {
+        "nombre": "Iker Morales",
+        "valoracion": 31
+    },
+    {
+        "nombre": "Diego Velazquez",
+        "valoracion": 43
+    },
+    {
+        "nombre": "Jorge Flores",
+        "valoracion": 42
+    },
+    {
+        "nombre": "Teo Alvarez",
+        "valoracion": 48
+    },
+    {
+        "nombre": "Gabriel Carvajal",
+        "valoracion": 44
+    },
+    {
+        "nombre": "Piero Iniesta",
+        "valoracion": 31
+    },
+    {
+        "nombre": "Gabriel Ortega",
+        "valoracion": 33
+    },
+    {
+        "nombre": "Esteban Quintana",
+        "valoracion": 45
+    },
+    {
+        "nombre": "Jorge Iniesta",
+        "valoracion": 31
+    },
+    {
+        "nombre": "Raul Tapia",
+        "valoracion": 31
+    },
+    {
+        "nombre": "Nicolas Castillo",
+        "valoracion": 41
+    },
+    {
+        "nombre": "Bruno Quintana",
+        "valoracion": 42
+    },
+    {
+        "nombre": "Rafael Castillo",
+        "valoracion": 59
+    },
+    {
+        "nombre": "Jorge Tapia",
+        "valoracion": 40
+    },
+    {
+        "nombre": "Xavier Gonzalez",
+        "valoracion": 56
+    },
+    {
+        "nombre": "Sergio Iglesias",
+        "valoracion": 49
+    },
+    {
+        "nombre": "Daniel Carvajal",
+        "valoracion": 38
+    },
+    {
+        "nombre": "Hugo Perez",
+        "valoracion": 58
+    }
+]

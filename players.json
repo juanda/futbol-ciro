@@ -1,0 +1,608 @@
+[
+  {
+    "nombre": "Jude Bellingham",
+    "valoracion": 89,
+    "equipo": "Real Madrid",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "Erling Haaland",
+    "valoracion": 97,
+    "equipo": "Manchester City",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Ciro Rodríguez",
+    "valoracion": 115,
+    "equipo": "Recreativo Soto del Real",
+    "posicion": "defensa central"
+  },
+  {
+    "nombre": "Vinícius Júnior",
+    "valoracion": 99,
+    "equipo": "Real Madrid",
+    "posicion": "extremo izquierdo"
+  },
+  {
+    "nombre": "Lamine Yamal",
+    "valoracion": 91,
+    "equipo": "FC Barcelona",
+    "posicion": "extremo derecho"
+  },
+  {
+    "nombre": "Kylian Mbappé",
+    "valoracion": 91,
+    "equipo": "Real Madrid",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Bukayo Saka",
+    "valoracion": 94,
+    "equipo": "Arsenal",
+    "posicion": "extremo derecho"
+  },
+  {
+    "nombre": "Florian Wirtz",
+    "valoracion": 91,
+    "equipo": "Bayer Leverkusen",
+    "posicion": "mediocampista ofensivo"
+  },
+  {
+    "nombre": "Cole Palmer",
+    "valoracion": 90,
+    "equipo": "Chelsea",
+    "posicion": "extremo"
+  },
+  {
+    "nombre": "Phil Foden",
+    "valoracion": 93,
+    "equipo": "Manchester City",
+    "posicion": "mediocampista ofensivo"
+  },
+  {
+    "nombre": "Rodrygo Goes",
+    "valoracion": 83,
+    "equipo": "Real Madrid",
+    "posicion": "extremo derecho"
+  },
+  {
+    "nombre": "Kai Havertz",
+    "valoracion": 97,
+    "equipo": "Arsenal",
+    "posicion": "mediocampista ofensivo"
+  },
+  {
+    "nombre": "Julián Álvarez",
+    "valoracion": 83,
+    "equipo": "Atlético de Madrid",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Savinho",
+    "valoracion": 87,
+    "equipo": "Manchester City",
+    "posicion": "extremo"
+  },
+  {
+    "nombre": "Jamal Musiala",
+    "valoracion": 95,
+    "equipo": "Bayern Múnich",
+    "posicion": "mediocampista ofensivo"
+  },
+  {
+    "nombre": "Benjamin Šeško",
+    "valoracion": 84,
+    "equipo": "RB Leipzig",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Joško Gvardiol",
+    "valoracion": 95,
+    "equipo": "Manchester City",
+    "posicion": "defensa central"
+  },
+  {
+    "nombre": "Federico Valverde",
+    "valoracion": 90,
+    "equipo": "Real Madrid",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "Rasmus Højlund",
+    "valoracion": 94,
+    "equipo": "Manchester United",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Declan Rice",
+    "valoracion": 98,
+    "equipo": "Arsenal",
+    "posicion": "centrocampista defensivo"
+  },
+  {
+    "nombre": "Lautaro Martínez",
+    "valoracion": 83,
+    "equipo": "Inter de Milán",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Lionel Messi",
+    "valoracion": 88,
+    "equipo": "Inter Miami CF",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Robert Lewandowski",
+    "valoracion": 99,
+    "equipo": "FC Barcelona",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Cristiano Ronaldo",
+    "valoracion": 85,
+    "equipo": "Al-Nassr",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Kevin De Bruyne",
+    "valoracion": 81,
+    "equipo": "Manchester City",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "Mohamed Salah",
+    "valoracion": 91,
+    "equipo": "Liverpool",
+    "posicion": "extremo derecho"
+  },
+  {
+    "nombre": "Harry Kane",
+    "valoracion": 89,
+    "equipo": "Bayern Múnich",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Joshua Kimmich",
+    "valoracion": 97,
+    "equipo": "Bayern Múnich",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "Bruno Fernandes",
+    "valoracion": 82,
+    "equipo": "Manchester United",
+    "posicion": "centrocampista ofensivo"
+  },
+  {
+    "nombre": "Son Heung-min",
+    "valoracion": 82,
+    "equipo": "Tottenham Hotspur",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Martin Ødegaard",
+    "valoracion": 86,
+    "equipo": "Arsenal",
+    "posicion": "centrocampista ofensivo"
+  },
+  {
+    "nombre": "Luka Modrić",
+    "valoracion": 90,
+    "equipo": "Real Madrid",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "Antoine Griezmann",
+    "valoracion": 99,
+    "equipo": "Atlético de Madrid",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Jan Oblak",
+    "valoracion": 82,
+    "equipo": "Atlético de Madrid",
+    "posicion": "portero"
+  },
+  {
+    "nombre": "Marc-André ter Stegen",
+    "valoracion": 88,
+    "equipo": "FC Barcelona",
+    "posicion": "portero"
+  },
+  {
+    "nombre": "Virgil van Dijk",
+    "valoracion": 81,
+    "equipo": "Liverpool",
+    "posicion": "defensa central"
+  },
+  {
+    "nombre": "Trent Alexander-Arnold",
+    "valoracion": 93,
+    "equipo": "Liverpool",
+    "posicion": "lateral derecho"
+  },
+  {
+    "nombre": "Darwin Núñez",
+    "valoracion": 87,
+    "equipo": "Liverpool",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Pedri",
+    "valoracion": 99,
+    "equipo": "FC Barcelona",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "Gavi",
+    "valoracion": 92,
+    "equipo": "FC Barcelona",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "Frenkie de Jong",
+    "valoracion": 95,
+    "equipo": "FC Barcelona",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "Ilkay Gündogan",
+    "valoracion": 84,
+    "equipo": "FC Barcelona",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "João Cancelo",
+    "valoracion": 84,
+    "equipo": "FC Barcelona",
+    "posicion": "lateral derecho"
+  },
+  {
+    "nombre": "Alejandro Balde",
+    "valoracion": 98,
+    "equipo": "FC Barcelona",
+    "posicion": "lateral izquierdo"
+  },
+  {
+    "nombre": "Raphinha",
+    "valoracion": 82,
+    "equipo": "FC Barcelona",
+    "posicion": "extremo derecho"
+  },
+  {
+    "nombre": "Ferran Torres",
+    "valoracion": 84,
+    "equipo": "FC Barcelona",
+    "posicion": "extremo"
+  },
+  {
+    "nombre": "Ousmane Dembélé",
+    "valoracion": 88,
+    "equipo": "Paris Saint-Germain",
+    "posicion": "extremo"
+  },
+  {
+    "nombre": "Achraf Hakimi",
+    "valoracion": 90,
+    "equipo": "Paris Saint-Germain",
+    "posicion": "lateral derecho"
+  },
+  {
+    "nombre": "Gianluigi Donnarumma",
+    "valoracion": 90,
+    "equipo": "Paris Saint-Germain",
+    "posicion": "portero"
+  },
+  {
+    "nombre": "Marco Verratti",
+    "valoracion": 83,
+    "equipo": "Al-Arabi",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "Marquinhos",
+    "valoracion": 91,
+    "equipo": "Paris Saint-Germain",
+    "posicion": "defensa central"
+  },
+  {
+    "nombre": "Milan Škriniar",
+    "valoracion": 98,
+    "equipo": "Paris Saint-Germain",
+    "posicion": "defensa central"
+  },
+  {
+    "nombre": "Vitinha",
+    "valoracion": 82,
+    "equipo": "Paris Saint-Germain",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "Eduardo Camavinga",
+    "valoracion": 97,
+    "equipo": "Real Madrid",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "Antonio Rüdiger",
+    "valoracion": 91,
+    "equipo": "Real Madrid",
+    "posicion": "defensa central"
+  },
+  {
+    "nombre": "Thibaut Courtois",
+    "valoracion": 97,
+    "equipo": "Real Madrid",
+    "posicion": "portero"
+  },
+  {
+    "nombre": "Ferland Mendy",
+    "valoracion": 92,
+    "equipo": "Real Madrid",
+    "posicion": "lateral izquierdo"
+  },
+  {
+    "nombre": "Dani Carvajal",
+    "valoracion": 93,
+    "equipo": "Real Madrid",
+    "posicion": "lateral derecho"
+  },
+  {
+    "nombre": "Brahim Díaz",
+    "valoracion": 90,
+    "equipo": "Real Madrid",
+    "posicion": "mediocampista ofensivo"
+  },
+  {
+    "nombre": "Arda Güler",
+    "valoracion": 98,
+    "equipo": "Real Madrid",
+    "posicion": "mediocampista ofensivo"
+  },
+  {
+    "nombre": "Rafael Leão",
+    "valoracion": 98,
+    "equipo": "AC Milan",
+    "posicion": "extremo izquierdo"
+  },
+  {
+    "nombre": "Theo Hernández",
+    "valoracion": 81,
+    "equipo": "AC Milan",
+    "posicion": "lateral izquierdo"
+  },
+  {
+    "nombre": "Mike Maignan",
+    "valoracion": 85,
+    "equipo": "AC Milan",
+    "posicion": "portero"
+  },
+  {
+    "nombre": "Ismaël Bennacer",
+    "valoracion": 88,
+    "equipo": "AC Milan",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "Nicolò Barella",
+    "valoracion": 92,
+    "equipo": "Inter de Milán",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "Hakan Çalhanoğlu",
+    "valoracion": 97,
+    "equipo": "Inter de Milán",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "Alessandro Bastoni",
+    "valoracion": 91,
+    "equipo": "Inter de Milán",
+    "posicion": "defensa central"
+  },
+  {
+    "nombre": "Marcus Thuram",
+    "valoracion": 89,
+    "equipo": "Inter de Milán",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Victor Osimhen",
+    "valoracion": 93,
+    "equipo": "Napoli",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Khvicha Kvaratskhelia",
+    "valoracion": 84,
+    "equipo": "Napoli",
+    "posicion": "extremo izquierdo"
+  },
+  {
+    "nombre": "Giovanni Di Lorenzo",
+    "valoracion": 93,
+    "equipo": "Napoli",
+    "posicion": "lateral derecho"
+  },
+  {
+    "nombre": "Federico Chiesa",
+    "valoracion": 95,
+    "equipo": "Juventus",
+    "posicion": "extremo"
+  },
+  {
+    "nombre": "Dušan Vlahović",
+    "valoracion": 86,
+    "equipo": "Juventus",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Adrien Rabiot",
+    "valoracion": 88,
+    "equipo": "Juventus",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "Wojciech Szczęsny",
+    "valoracion": 87,
+    "equipo": "Juventus",
+    "posicion": "portero"
+  },
+  {
+    "nombre": "Sadio Mané",
+    "valoracion": 86,
+    "equipo": "Al-Nassr",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Riyad Mahrez",
+    "valoracion": 89,
+    "equipo": "Al-Ahli",
+    "posicion": "extremo derecho"
+  },
+  {
+    "nombre": "Karim Benzema",
+    "valoracion": 97,
+    "equipo": "Al-Ittihad",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Neymar Jr.",
+    "valoracion": 91,
+    "equipo": "Al-Hilal",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Aleksandar Mitrović",
+    "valoracion": 98,
+    "equipo": "Al-Hilal",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Rúben Neves",
+    "valoracion": 95,
+    "equipo": "Al-Hilal",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "Sergej Milinković-Savić",
+    "valoracion": 96,
+    "equipo": "Al-Hilal",
+    "posicion": "centrocampista"
+  },
+  {
+    "nombre": "Manuel Neuer",
+    "valoracion": 99,
+    "equipo": "Bayern Múnich",
+    "posicion": "portero"
+  },
+  {
+    "nombre": "Alphonso Davies",
+    "valoracion": 98,
+    "equipo": "Bayern Múnich",
+    "posicion": "lateral izquierdo"
+  },
+  {
+    "nombre": "Leroy Sané",
+    "valoracion": 94,
+    "equipo": "Bayern Múnich",
+    "posicion": "extremo"
+  },
+  {
+    "nombre": "Serge Gnabry",
+    "valoracion": 80,
+    "equipo": "Bayern Múnich",
+    "posicion": "extremo"
+  },
+  {
+    "nombre": "Thomas Müller",
+    "valoracion": 88,
+    "equipo": "Bayern Múnich",
+    "posicion": "mediocampista/delantero"
+  },
+  {
+    "nombre": "Matthijs de Ligt",
+    "valoracion": 92,
+    "equipo": "Bayern Múnich",
+    "posicion": "defensa central"
+  },
+  {
+    "nombre": "Marco Reus",
+    "valoracion": 97,
+    "equipo": "Borussia Dortmund",
+    "posicion": "mediocampista ofensivo"
+  },
+  {
+    "nombre": "Julian Brandt",
+    "valoracion": 95,
+    "equipo": "Borussia Dortmund",
+    "posicion": "mediocampista"
+  },
+  {
+    "nombre": "Mats Hummels",
+    "valoracion": 93,
+    "equipo": "Borussia Dortmund",
+    "posicion": "defensa central"
+  },
+  {
+    "nombre": "Karim Adeyemi",
+    "valoracion": 81,
+    "equipo": "Borussia Dortmund",
+    "posicion": "delantero"
+  },
+  {
+    "nombre": "Dani Olmo",
+    "valoracion": 90,
+    "equipo": "RB Leipzig",
+    "posicion": "mediocampista"
+  },
+  {
+    "nombre": "Xavi Simons",
+    "valoracion": 88,
+    "equipo": "RB Leipzig",
+    "posicion": "mediocampista"
+  },
+  {
+    "nombre": "Mikel Oyarzabal",
+    "valoracion": 94,
+    "equipo": "Real Sociedad",
+    "posicion": "extremo"
+  },
+  {
+    "nombre": "Nico Williams",
+    "valoracion": 86,
+    "equipo": "Athletic Club",
+    "posicion": "extremo"
+  },
+  {
+    "nombre": "James Maddison",
+    "valoracion": 99,
+    "equipo": "Tottenham Hotspur",
+    "posicion": "mediocampista"
+  },
+  {
+    "nombre": "Cristian Romero",
+    "valoracion": 92,
+    "equipo": "Tottenham Hotspur",
+    "posicion": "defensa central"
+  },
+  {
+    "nombre": "Dejan Kulusevski",
+    "valoracion": 80,
+    "equipo": "Tottenham Hotspur",
+    "posicion": "extremo"
+  },
+  {
+    "nombre": "William Saliba",
+    "valoracion": 91,
+    "equipo": "Arsenal",
+    "posicion": "defensa central"
+  },
+  {
+    "nombre": "Gabriel Magalhães",
+    "valoracion": 97,
+    "equipo": "Arsenal",
+    "posicion": "defensa central"
+  }
+]

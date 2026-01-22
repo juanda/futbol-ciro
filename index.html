@@ -18,22 +18,26 @@
           <span class="coin-amount" id="coin-amount">200</span>
           <span class="coin-delta" id="coin-delta"></span>
         </div>
+        <div class="rating-display">
+          <span class="rating-label">Valoracion</span>
+          <span class="rating-amount" id="team-rating">0</span>
+        </div>
       </header>
 
       <main class="content screen-main" id="home-screen">
         <section class="pitch-wrap">
           <div class="pitch">
-            <div class="player p1" data-player="p1" data-rating="83"><span class="pos-text">POR</span><br /><small>83</small></div>
-            <div class="player p2" data-player="p2" data-rating="81"><span class="pos-text">LI</span><br /><small>81</small></div>
-            <div class="player p3" data-player="p3" data-rating="84"><span class="pos-text">DFC</span><br /><small>84</small></div>
-            <div class="player p4" data-player="p4" data-rating="82"><span class="pos-text">DFC</span><br /><small>82</small></div>
-            <div class="player p5" data-player="p5" data-rating="80"><span class="pos-text">LD</span><br /><small>80</small></div>
-            <div class="player p6" data-player="p6" data-rating="85"><span class="pos-text">MCD</span><br /><small>85</small></div>
-            <div class="player p7" data-player="p7" data-rating="86"><span class="pos-text">MC</span><br /><small>86</small></div>
-            <div class="player p8" data-player="p8" data-rating="87"><span class="pos-text">MCO</span><br /><small>87</small></div>
-            <div class="player p9" data-player="p9" data-rating="88"><span class="pos-text">EI</span><br /><small>88</small></div>
-            <div class="player p10" data-player="p10" data-rating="90"><span class="pos-text">DC</span><br /><small>90</small></div>
-            <div class="player p11" data-player="p11" data-rating="88"><span class="pos-text">ED</span><br /><small>88</small></div>
+            <div class="player p1" data-player="p1" data-rating="83"><span class="dorsal-text"></span><span class="pos-text">POR</span><div class="player-name"></div><small>83</small></div>
+            <div class="player p2" data-player="p2" data-rating="81"><span class="dorsal-text"></span><span class="pos-text">LI</span><div class="player-name"></div><small>81</small></div>
+            <div class="player p3" data-player="p3" data-rating="84"><span class="dorsal-text"></span><span class="pos-text">DFC</span><div class="player-name"></div><small>84</small></div>
+            <div class="player p4" data-player="p4" data-rating="82"><span class="dorsal-text"></span><span class="pos-text">DFC</span><div class="player-name"></div><small>82</small></div>
+            <div class="player p5" data-player="p5" data-rating="80"><span class="dorsal-text"></span><span class="pos-text">LD</span><div class="player-name"></div><small>80</small></div>
+            <div class="player p6" data-player="p6" data-rating="85"><span class="dorsal-text"></span><span class="pos-text">MCD</span><div class="player-name"></div><small>85</small></div>
+            <div class="player p7" data-player="p7" data-rating="86"><span class="dorsal-text"></span><span class="pos-text">MC</span><div class="player-name"></div><small>86</small></div>
+            <div class="player p8" data-player="p8" data-rating="87"><span class="dorsal-text"></span><span class="pos-text">MCO</span><div class="player-name"></div><small>87</small></div>
+            <div class="player p9" data-player="p9" data-rating="88"><span class="dorsal-text"></span><span class="pos-text">EI</span><div class="player-name"></div><small>88</small></div>
+            <div class="player p10" data-player="p10" data-rating="90"><span class="dorsal-text"></span><span class="pos-text">DC</span><div class="player-name"></div><small>90</small></div>
+            <div class="player p11" data-player="p11" data-rating="88"><span class="dorsal-text"></span><span class="pos-text">ED</span><div class="player-name"></div><small>88</small></div>
           </div>
         </section>
 
@@ -52,7 +56,13 @@
           >
             Formacion
           </button>
-          <button class="menu-btn">Tienda</button>
+          <button
+            class="menu-btn"
+            id="store-btn"
+            onclick="document.getElementById('store-screen').classList.remove('screen-hidden'); document.getElementById('home-screen').classList.add('screen-hidden'); window.scrollTo(0,0);"
+          >
+            Tienda
+          </button>
           <button
             class="menu-btn"
             id="club-btn"
@@ -67,9 +77,8 @@
           >
             Mercado
           </button>
-          <button class="menu-btn">Dorsales</button>
-          <button class="menu-btn">Valoracion</button>
-          <button class="menu-btn">Plantilla</button>
+          <button class="menu-btn" id="dorsal-btn">Dorsales</button>
+          <button class="menu-btn" id="plantilla-btn">Plantilla</button>
         </section>
       </main>
 
@@ -221,10 +230,103 @@
         </section>
       </main>
 
+      <main class="content screen-main screen-hidden" id="store-screen">
+        <section class="store">
+          <div class="rivals-header">
+            <h2>Tienda</h2>
+            <button
+              class="menu-btn small"
+              id="store-back"
+              onclick="document.getElementById('home-screen').classList.remove('screen-hidden'); document.getElementById('store-screen').classList.add('screen-hidden'); window.scrollTo(0,0);"
+            >
+              Volver
+            </button>
+          </div>
+
+          <div class="store-list" id="store-list"></div>
+
+          <div class="store-result">
+            <div class="store-result-card screen-hidden" id="store-result-card">
+              <div class="store-result-title">Nuevo fichaje</div>
+              <div class="store-result-name" id="store-result-name"></div>
+              <div class="store-result-meta" id="store-result-meta"></div>
+              <div class="store-result-rating" id="store-result-rating"></div>
+            </div>
+          </div>
+
+          <p class="store-note" id="store-note">Abre un sobre para recibir un jugador.</p>
+        </section>
+      </main>
+
+      <main class="content screen-main screen-hidden" id="dorsal-screen">
+        <section class="dorsal">
+          <div class="rivals-header">
+            <h2>Dorsales</h2>
+            <button
+              class="menu-btn small"
+              id="dorsal-back"
+              onclick="document.getElementById('home-screen').classList.remove('screen-hidden'); document.getElementById('dorsal-screen').classList.add('screen-hidden'); window.scrollTo(0,0);"
+            >
+              Volver
+            </button>
+          </div>
+
+          <div class="dorsal-list" id="dorsal-list"></div>
+          <p class="dorsal-note" id="dorsal-note">Asigna un numero a cada jugador titular.</p>
+        </section>
+      </main>
+
+      <main class="content screen-main screen-hidden" id="plantilla-screen">
+        <section class="plantilla">
+          <div class="rivals-header">
+            <h2>Plantilla</h2>
+            <button
+              class="menu-btn small"
+              id="plantilla-back"
+              onclick="document.getElementById('home-screen').classList.remove('screen-hidden'); document.getElementById('plantilla-screen').classList.add('screen-hidden'); window.scrollTo(0,0);"
+            >
+              Volver
+            </button>
+          </div>
+
+          <div class="pitch-wrap">
+            <div class="pitch">
+              <div class="player p1" data-player="p1" data-rating="83"><span class="dorsal-text"></span><span class="pos-text">POR</span><div class="player-name"></div><small>83</small></div>
+              <div class="player p2" data-player="p2" data-rating="81"><span class="dorsal-text"></span><span class="pos-text">LI</span><div class="player-name"></div><small>81</small></div>
+              <div class="player p3" data-player="p3" data-rating="84"><span class="dorsal-text"></span><span class="pos-text">DFC</span><div class="player-name"></div><small>84</small></div>
+              <div class="player p4" data-player="p4" data-rating="82"><span class="dorsal-text"></span><span class="pos-text">DFC</span><div class="player-name"></div><small>82</small></div>
+              <div class="player p5" data-player="p5" data-rating="80"><span class="dorsal-text"></span><span class="pos-text">LD</span><div class="player-name"></div><small>80</small></div>
+              <div class="player p6" data-player="p6" data-rating="85"><span class="dorsal-text"></span><span class="pos-text">MCD</span><div class="player-name"></div><small>85</small></div>
+              <div class="player p7" data-player="p7" data-rating="86"><span class="dorsal-text"></span><span class="pos-text">MC</span><div class="player-name"></div><small>86</small></div>
+              <div class="player p8" data-player="p8" data-rating="87"><span class="dorsal-text"></span><span class="pos-text">MCO</span><div class="player-name"></div><small>87</small></div>
+              <div class="player p9" data-player="p9" data-rating="88"><span class="dorsal-text"></span><span class="pos-text">EI</span><div class="player-name"></div><small>88</small></div>
+              <div class="player p10" data-player="p10" data-rating="90"><span class="dorsal-text"></span><span class="pos-text">DC</span><div class="player-name"></div><small>90</small></div>
+              <div class="player p11" data-player="p11" data-rating="88"><span class="dorsal-text"></span><span class="pos-text">ED</span><div class="player-name"></div><small>88</small></div>
+            </div>
+          </div>
+
+          <div class="menu plantilla-menu">
+            <button class="menu-btn" id="plantilla-home">Plantilla</button>
+            <button class="menu-btn" id="plantilla-club">Club</button>
+            <button class="menu-btn" id="plantilla-market">Mercado</button>
+          </div>
+
+          <div class="plantilla-bench" id="plantilla-bench"></div>
+          <p class="plantilla-note" id="plantilla-note">Selecciona un jugador del XI y luego uno del club para cambiar.</p>
+        </section>
+      </main>
+
       <main class="content screen-main screen-hidden" id="club-screen">
         <section class="club">
           <div class="rivals-header">
             <h2>Club</h2>
+            <button
+              class="menu-btn small"
+              id="club-plantilla"
+              onclick="document.getElementById('plantilla-screen').classList.remove('screen-hidden'); document.getElementById('club-screen').classList.add('screen-hidden'); window.scrollTo(0,0);"
+            >
+              Plantilla
+            </button>
             <button
               class="menu-btn small"
               id="club-back"
@@ -235,6 +337,7 @@
           </div>
 
           <div class="club-list" id="club-list"></div>
+          <p class="club-note" id="club-note"></p>
         </section>
       </main>
 
