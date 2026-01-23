@@ -43,6 +43,9 @@ const plantillaClubButton = document.querySelector("#plantilla-club");
 const plantillaMarketButton = document.querySelector("#plantilla-market");
 const plantillaBench = document.querySelector("#plantilla-bench");
 const plantillaNote = document.querySelector("#plantilla-note");
+const plantillaSearchInput = document.querySelector("#plantilla-search");
+const plantillaPosButton = document.querySelector("#plantilla-pos-btn");
+const plantillaPosInput = document.querySelector("#plantilla-pos-input");
 const marketButton = document.querySelector("#market-btn");
 const marketBackButton = document.querySelector("#market-back");
 const marketScreen = document.querySelector("#market-screen");
@@ -52,6 +55,66 @@ const marketSortButtons = document.querySelectorAll(".market-sort");
 const marketInputName = document.querySelector("#market-input-name");
 const marketInputClub = document.querySelector("#market-input-club");
 const marketInputPos = document.querySelector("#market-input-pos");
+
+const ratingMismatchPenalty = 5;
+
+const initSlotPositions = () => {
+  document.querySelectorAll(".player[data-player]").forEach((card) => {
+    if (!card.dataset.slotPos) {
+      const posEl = card.querySelector(".pos-text");
+      if (posEl) card.dataset.slotPos = posEl.textContent.trim();
+    }
+    if (!card.querySelector(".pos-warning")) {
+      const warning = document.createElement("span");
+      warning.className = "pos-warning";
+      warning.textContent = "!";
+      warning.setAttribute("aria-hidden", "true");
+      card.appendChild(warning);
+    }
+  });
+};
+
+const isPositionMismatch = (player, slotPos) => {
+  if (!player?.pos || !slotPos) return false;
+  return player.pos !== slotPos;
+};
+
+const getAdjustedRating = (player, slotPos) => {
+  const base = Number(player?.rating) || 0;
+  if (!isPositionMismatch(player, slotPos)) return base;
+  return Math.max(0, base - ratingMismatchPenalty);
+};
+
+const getSlotPosForPlayer = (playerId) => {
+  const card = document.querySelector(`[data-player="${playerId}"]`);
+  return card?.dataset.slotPos?.trim() || "";
+};
+
+const clearSwapSelection = () => {
+  selectedSwap = null;
+  updateSelectedSlotUI();
+};
+
+const setSwapSelection = (selection) => {
+  selectedSwap = selection;
+  updateSelectedSlotUI();
+};
+
+const togglePlantillaPosInput = () => {
+  if (!plantillaPosInput) return;
+  const isHidden = plantillaPosInput.classList.contains("screen-hidden");
+  plantillaPosInput.classList.toggle("screen-hidden", !isHidden);
+  if (isHidden) {
+    plantillaPosInput.value = "";
+    plantillaPosInput.focus();
+    plantillaPosQuery = "";
+    renderPlantillaBench();
+  } else {
+    plantillaPosInput.value = "";
+    plantillaPosQuery = "";
+    renderPlantillaBench();
+  }
+};
 
 const showScreen = (screenToShow, screenToHide) => {
   screenToHide.classList.add("screen-hidden");
@@ -426,12 +489,14 @@ formationButtons.forEach((button) => {
 let databasePlayers = [];
 let players = [];
 let marketPlayers = [];
-let selectedLineupSlot = null;
+let selectedSwap = null;
 let draggedBenchId = null;
+let plantillaSearchQuery = "";
+let plantillaPosQuery = "";
 
 const defaultNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 const storageKey = "fc-players-state";
-const clubSize = 15;
+const clubSize = Number.MAX_SAFE_INTEGER;
 
 const positionMap = {
   portero: "POR",
@@ -537,11 +602,15 @@ const syncLineupCards = () => {
         const nameEl = card.querySelector(".player-name");
         const ratingEl = card.querySelector("small");
         const isHome = Boolean(card.closest("#home-screen"));
+        const slotPos = card.dataset.slotPos?.trim() || "";
+        const mismatch = isPositionMismatch(player, slotPos);
+        const adjustedRating = getAdjustedRating(player, slotPos);
         if (posEl) posEl.textContent = player.pos;
         if (nameEl) nameEl.textContent = isHome ? getSurname(player.name) : player.name;
-        if (ratingEl) ratingEl.textContent = String(player.rating);
-        card.setAttribute("data-rating", String(player.rating));
-        const tier = getTierByRating(player.rating);
+        if (ratingEl) ratingEl.textContent = String(adjustedRating);
+        card.setAttribute("data-rating", String(adjustedRating));
+        card.classList.toggle("pos-mismatch", mismatch);
+        const tier = getTierByRating(adjustedRating);
         if (tier) card.classList.add(tier);
       });
     });
@@ -554,15 +623,33 @@ const updateTeamRating = () => {
     teamRating.textContent = "0";
     return;
   }
-  const total = lineupPlayers.reduce((sum, player) => sum + (Number(player.rating) || 0), 0);
+  const total = lineupPlayers.reduce((sum, player) => {
+    const slotPos = getSlotPosForPlayer(player.id);
+    return sum + getAdjustedRating(player, slotPos);
+  }, 0);
   teamRating.textContent = String(Math.round(total / lineupPlayers.length));
 };
 
 const updateSelectedSlotUI = () => {
-  if (!plantillaScreen) return;
-  plantillaScreen.querySelectorAll(".player").forEach((card) => {
-    card.classList.remove("selected");
-  });
+  document
+    .querySelectorAll("#plantilla-screen .player, #plantilla-screen .plantilla-bench-card, #club-screen .club-card")
+    .forEach((card) => {
+      card.classList.remove("selected");
+    });
+  if (!selectedSwap) return;
+  if (selectedSwap.scope === "plantilla") {
+    if (selectedSwap.type === "lineup") {
+      const card = document.querySelector(`#plantilla-screen .player[data-player="${selectedSwap.id}"]`);
+      if (card) card.classList.add("selected");
+    } else {
+      const card = document.querySelector(`#plantilla-screen .plantilla-bench-card[data-id="${selectedSwap.id}"]`);
+      if (card) card.classList.add("selected");
+    }
+  }
+  if (selectedSwap.scope === "club") {
+    const card = document.querySelector(`#club-screen .club-card[data-id="${selectedSwap.id}"]`);
+    if (card) card.classList.add("selected");
+  }
 };
 
 const shuffle = (list) => {
@@ -722,9 +809,28 @@ const renderDorsalList = () => {
   if (dorsalNote) dorsalNote.textContent = "Asigna un numero a cada jugador titular.";
 };
 
+const getFilteredBenchPlayers = () => {
+  const benchPlayers = players.filter((player) => !player.inLineup);
+  const query = plantillaSearchQuery.trim().toLowerCase();
+  const posQuery = plantillaPosQuery.trim().toLowerCase();
+  return benchPlayers.filter((player) => {
+    const values = [player.name, player.club, player.pos, player.posFull]
+      .filter(Boolean)
+      .map((value) => String(value).toLowerCase());
+    const matchesText = !query || values.some((value) => value.includes(query));
+    const matchesPos =
+      !posQuery ||
+      [player.pos, player.posFull]
+        .filter(Boolean)
+        .map((value) => String(value).toLowerCase())
+        .some((value) => value.includes(posQuery));
+    return matchesText && matchesPos;
+  });
+};
+
 const renderPlantillaBench = () => {
   if (!plantillaBench) return;
-  const benchPlayers = players.filter((player) => !player.inLineup);
+  const benchPlayers = getFilteredBenchPlayers();
   plantillaBench.innerHTML = benchPlayers
     .map(
       (player) => `
@@ -742,7 +848,11 @@ const renderPlantillaBench = () => {
     )
     .join("");
   if (plantillaNote) {
-    plantillaNote.textContent = "Arrastra un jugador del club hacia una posicion del XI.";
+    if ((plantillaSearchQuery.trim() || plantillaPosQuery.trim()) && !benchPlayers.length) {
+      plantillaNote.textContent = "No hay resultados para ese filtro.";
+    } else {
+      plantillaNote.textContent = "Arrastra un jugador del club hacia una posicion del XI.";
+    }
   }
 };
 
@@ -768,7 +878,7 @@ const swapIntoLineup = (benchDbId, forcedSlotId = null) => {
   bench.slot = targetSlot;
   bench.id = `p${targetSlot}`;
   if (!bench.number) bench.number = defaultNumbers[targetSlot - 1] ?? null;
-  selectedLineupSlot = null;
+  clearSwapSelection();
   syncLineupCards();
   players.filter((player) => player.inLineup).forEach((player) => {
     updateDorsalDisplay(player.id, player.number);
@@ -780,6 +890,128 @@ const swapIntoLineup = (benchDbId, forcedSlotId = null) => {
   persistState();
   return true;
 };
+
+const swapLineupSlots = (slotIdA, slotIdB) => {
+  if (!slotIdA || !slotIdB || slotIdA === slotIdB) return false;
+  const playerA = players.find((player) => player.inLineup && player.id === slotIdA);
+  const playerB = players.find((player) => player.inLineup && player.id === slotIdB);
+  if (!playerA || !playerB) return false;
+  const slotA = playerA.slot ?? Number(slotIdA.slice(1));
+  const slotB = playerB.slot ?? Number(slotIdB.slice(1));
+  playerA.slot = slotB;
+  playerB.slot = slotA;
+  playerA.id = `p${slotB}`;
+  playerB.id = `p${slotA}`;
+  syncLineupCards();
+  players.filter((player) => player.inLineup).forEach((player) => {
+    updateDorsalDisplay(player.id, player.number);
+  });
+  renderClub();
+  renderDorsalList();
+  renderPlantillaBench();
+  updateSelectedSlotUI();
+  updateTeamRating();
+  persistState();
+  return true;
+};
+
+const swapBenchOrder = (benchIdA, benchIdB) => {
+  if (!benchIdA || !benchIdB || benchIdA === benchIdB) return false;
+  const indexA = players.findIndex((player) => player.dbId === benchIdA);
+  const indexB = players.findIndex((player) => player.dbId === benchIdB);
+  if (indexA < 0 || indexB < 0) return false;
+  [players[indexA], players[indexB]] = [players[indexB], players[indexA]];
+  renderClub();
+  renderPlantillaBench();
+  persistState();
+  return true;
+};
+
+const handlePlantillaSwapClick = (event) => {
+  if (!plantillaScreen || plantillaScreen.classList.contains("screen-hidden")) return;
+  const pitchTarget = event.target.closest("#plantilla-screen .player");
+  const benchTarget = event.target.closest("#plantilla-screen .plantilla-bench-card");
+  if (!pitchTarget && !benchTarget) return;
+  const selection = pitchTarget
+    ? { scope: "plantilla", type: "lineup", id: pitchTarget.getAttribute("data-player") }
+    : { scope: "plantilla", type: "bench", id: benchTarget.getAttribute("data-id") };
+  if (!selection.id) return;
+  if (!selectedSwap || selectedSwap.scope !== "plantilla") {
+    setSwapSelection(selection);
+    return;
+  }
+  if (selectedSwap.type === selection.type && selectedSwap.id === selection.id) {
+    clearSwapSelection();
+    return;
+  }
+  let swapped = false;
+  if (selectedSwap.type === "lineup" && selection.type === "lineup") {
+    swapped = swapLineupSlots(selectedSwap.id, selection.id);
+  } else if (selectedSwap.type === "bench" && selection.type === "bench") {
+    swapped = swapBenchOrder(selectedSwap.id, selection.id);
+  } else {
+    const benchId = selectedSwap.type === "bench" ? selectedSwap.id : selection.id;
+    const slotId = selectedSwap.type === "lineup" ? selectedSwap.id : selection.id;
+    swapped = swapIntoLineup(benchId, slotId);
+  }
+  if (!swapped && plantillaNote) {
+    plantillaNote.textContent = "No se pudo cambiar el jugador.";
+  }
+  clearSwapSelection();
+};
+
+const handleClubSwapClick = (event) => {
+  if (!clubScreen || clubScreen.classList.contains("screen-hidden")) return;
+  const clubTarget = event.target.closest("#club-screen .club-card");
+  if (!clubTarget) return;
+  const playerId = clubTarget.getAttribute("data-id");
+  if (!playerId) return;
+  const player = players.find((item) => item.dbId === playerId);
+  if (!player) return;
+  const selection = {
+    scope: "club",
+    type: player.inLineup ? "lineup" : "bench",
+    id: player.dbId,
+  };
+  if (!selectedSwap || selectedSwap.scope !== "club") {
+    setSwapSelection(selection);
+    if (clubNote && player?.name) {
+      clubNote.textContent = `Seleccionado ${player.name}. Elige otro para cambiar.`;
+    }
+    return;
+  }
+  if (selectedSwap.id === selection.id) {
+    clearSwapSelection();
+    return;
+  }
+  const first = players.find((item) => item.dbId === selectedSwap.id);
+  const second = players.find((item) => item.dbId === selection.id);
+  if (!first || !second) {
+    clearSwapSelection();
+    return;
+  }
+  let swapped = false;
+  if (first.inLineup && second.inLineup) {
+    swapped = swapLineupSlots(first.id, second.id);
+  } else if (first.inLineup || second.inLineup) {
+    const lineupPlayer = first.inLineup ? first : second;
+    const benchPlayer = first.inLineup ? second : first;
+    swapped = swapIntoLineup(benchPlayer.dbId, lineupPlayer.id);
+  } else {
+    swapped = swapBenchOrder(first.dbId, second.dbId);
+  }
+  if (swapped) {
+    if (clubNote) clubNote.textContent = "Intercambio realizado.";
+    clearSwapSelection();
+  } else {
+    if (clubNote) clubNote.textContent = "No se pudo cambiar el jugador.";
+  }
+};
+
+document.addEventListener("click", (event) => {
+  handlePlantillaSwapClick(event);
+  handleClubSwapClick(event);
+});
 
 
 const storePacks = [
@@ -825,24 +1057,37 @@ const storePacks = [
     tier: "future",
     odds: { common: 0.12, rare: 0.44, epic: 0.44 },
   },
+  {
+    id: "legend",
+    name: "Sobre Leyendas",
+    price: 30000,
+    tier: "legend",
+    odds: { legend: 0.25, epic: 0.45, rare: 0.3 },
+  },
 ];
 
 const ratingRanges = {
   common: [70, 84],
   rare: [85, 92],
   epic: [93, 99],
+  legend: [95, 99],
 };
 
 const rarityLabels = {
   common: "Comun",
   rare: "Raro",
   epic: "Estrella",
+  legend: "Leyenda",
 };
 
 const rollRarity = (odds) => {
   const roll = Math.random();
-  if (roll < odds.epic) return "epic";
-  if (roll < odds.epic + odds.rare) return "rare";
+  const legend = Number(odds.legend) || 0;
+  const epic = Number(odds.epic) || 0;
+  const rare = Number(odds.rare) || 0;
+  if (roll < legend) return "legend";
+  if (roll < legend + epic) return "epic";
+  if (roll < legend + epic + rare) return "rare";
   return "common";
 };
 
@@ -854,8 +1099,15 @@ const pickPackPlayer = (rarity) => {
   return pool[Math.floor(Math.random() * pool.length)];
 };
 
-const formatOdds = (odds) =>
-  `Estrella ${(odds.epic * 100).toFixed(0)}% | Raro ${(odds.rare * 100).toFixed(0)}%`;
+const formatOdds = (odds) => {
+  const legend = Number(odds.legend) || 0;
+  const epic = Number(odds.epic) || 0;
+  const rare = Number(odds.rare) || 0;
+  if (legend > 0) {
+    return `Leyenda ${(legend * 100).toFixed(0)}% | Estrella ${(epic * 100).toFixed(0)}% | Raro ${(rare * 100).toFixed(0)}%`;
+  }
+  return `Estrella ${(epic * 100).toFixed(0)}% | Raro ${(rare * 100).toFixed(0)}%`;
+};
 
 const renderStore = () => {
   if (!storeList) return;
@@ -1053,6 +1305,21 @@ marketInputPos?.addEventListener("input", (event) => {
   filterMarket("pos", event.target.value);
 });
 
+plantillaSearchInput?.addEventListener("input", (event) => {
+  plantillaSearchQuery = event.target.value;
+  renderPlantillaBench();
+});
+
+plantillaPosButton?.addEventListener("click", (event) => {
+  event.preventDefault();
+  togglePlantillaPosInput();
+});
+
+plantillaPosInput?.addEventListener("input", (event) => {
+  plantillaPosQuery = event.target.value;
+  renderPlantillaBench();
+});
+
 const loadDatabase = async () => {
   try {
     const response = await fetch("players.json");
@@ -1067,6 +1334,7 @@ const loadDatabase = async () => {
   }
 };
 
+initSlotPositions();
 loadDatabase();
 renderStore();
 
