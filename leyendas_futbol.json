@@ -1,0 +1,107 @@
+[
+  {
+    "nombre": "Lionel Messi",
+    "posicion": "Delantero/Centrocampista",
+    "valoracion": 10
+  },
+  {
+    "nombre": "Diego Maradona",
+    "posicion": "Mediocampista ofensivo/Delantero",
+    "valoracion": 10
+  },
+  {
+    "nombre": "Pelé",
+    "posicion": "Delantero",
+    "valoracion": 10
+  },
+  {
+    "nombre": "Johan Cruyff",
+    "posicion": "Centrocampista/Delantero",
+    "valoracion": 9.7
+  },
+  {
+    "nombre": "Franz Beckenbauer",
+    "posicion": "Líbero/Mediocentro defensivo",
+    "valoracion": 9.5
+  },
+  {
+    "nombre": "Cristiano Ronaldo",
+    "posicion": "Delantero",
+    "valoracion": 9.8
+  },
+  {
+    "nombre": "Zinedine Zidane",
+    "posicion": "Centrocampista ofensivo",
+    "valoracion": 9.4
+  },
+  {
+    "nombre": "Alfredo Di Stéfano",
+    "posicion": "Mediapunta",
+    "valoracion": 9.6
+  },
+  {
+    "nombre": "Ferenc Puskás",
+    "posicion": "Delantero",
+    "valoracion": 9.5
+  },
+  {
+    "nombre": "Ronaldinho",
+    "posicion": "Centrocampista/Delantero",
+    "valoracion": 9.4
+  },
+  {
+    "nombre": "Ronaldo Nazário",
+    "posicion": "Delantero",
+    "valoracion": 9.5
+  },
+  {
+    "nombre": "Garrincha",
+    "posicion": "Extremo derecho/Delantero",
+    "valoracion": 9.3
+  },
+  {
+    "nombre": "Michel Platini",
+    "posicion": "Centrocampista",
+    "valoracion": 9.3
+  },
+  {
+    "nombre": "Paolo Maldini",
+    "posicion": "Lateral izquierdo/Defensa central",
+    "valoracion": 9.2
+  },
+  {
+    "nombre": "Lev Yashin",
+    "posicion": "Portero",
+    "valoracion": 9.3
+  },
+  {
+    "nombre": "Roberto Baggio",
+    "posicion": "Delantero/Mediapunta",
+    "valoracion": 9.2
+  },
+  {
+    "nombre": "Xavi Hernández",
+    "posicion": "Mediocentro",
+    "valoracion": 9.1
+  },
+  {
+    "nombre": "Andrés Iniesta",
+    "posicion": "Centrocampista",
+    "valoracion": 9.1
+  },
+  {
+    "nombre": "George Best",
+    "posicion": "Extremo/Mediapunta",
+    "valoracion": 9.3
+  },
+  {
+    "nombre": "Franco Baresi",
+    "posicion": "Líbero/Defensa central",
+    "valoracion": 9.2
+  },
+  {
+    "nombre": "Gerd Müller",
+    "posicion": "Delantero centro",
+    "valoracion": 9.4
+  }
+]

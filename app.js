@@ -2,6 +2,8 @@ const playButton = document.querySelector("#play-btn");
 const backButton = document.querySelector("#back-btn");
 const formationButton = document.querySelector("#formation-btn");
 const formationBackButton = document.querySelector("#formation-back");
+const coverScreen = document.querySelector("#cover-screen");
+const coverPlayButton = document.querySelector("#cover-play");
 const homeScreen = document.querySelector("#home-screen");
 const playScreen = document.querySelector("#play-screen");
 const formationScreen = document.querySelector("#formation-screen");
@@ -9,7 +11,9 @@ const winPanel = document.querySelector("#result-win");
 const drawPanel = document.querySelector("#result-draw");
 const losePanel = document.querySelector("#result-lose");
 const resultCloseButtons = document.querySelectorAll(".result-close");
-const rivalCards = document.querySelectorAll(".rival-card");
+const rivalsPyramid = document.querySelector("#rivals-pyramid");
+const musicToggleButton = document.querySelector("#music-toggle");
+const playNote = document.querySelector("#play-note");
 const coinAmount = document.querySelector("#coin-amount");
 const coinDelta = document.querySelector("#coin-delta");
 const teamRating = document.querySelector("#team-rating");
@@ -57,6 +61,291 @@ const marketInputClub = document.querySelector("#market-input-club");
 const marketInputPos = document.querySelector("#market-input-pos");
 
 const ratingMismatchPenalty = 5;
+const injuryChance = 0.05;
+const redCardChance = 0.04;
+const injuryMatchesDefault = 5;
+const redCardMatchesDefault = 5;
+const injuryPenalty = 6;
+const winStreakKey = "fc-win-streak";
+const winStreakTarget = 5;
+const winStreakCoins = 1500;
+const winStreakPackId = "collision";
+const startingCoins = 1000;
+if (coinAmount) coinAmount.textContent = String(startingCoins);
+
+let isResettingBankrupt = false;
+
+const musicState = {
+  context: null,
+  masterGain: null,
+  tracks: [],
+  timers: [],
+  lfoTimer: null,
+  lfoPhase: 0,
+  duckUntil: 0,
+  isPlaying: false,
+};
+
+const setCoverMode = (active) => {
+  document.body.classList.toggle("cover-mode", active);
+};
+
+const melodyPattern = [
+  { freq: 392, hold: 1 },
+  { freq: 261.63, hold: 2 },
+  { freq: 440, hold: 1 },
+  { freq: 293.66, hold: 2 },
+  { freq: 349.23, hold: 1 },
+  { freq: 0, hold: 1 },
+  { freq: 329.63, hold: 1 },
+  { freq: 493.88, hold: 2 },
+  { freq: 293.66, hold: 1 },
+  { freq: 392, hold: 2 },
+  { freq: 277.18, hold: 1 },
+  { freq: 0, hold: 1 },
+  { freq: 523.25, hold: 2 },
+  { freq: 329.63, hold: 1 },
+  { freq: 415.3, hold: 2 },
+  { freq: 261.63, hold: 1 },
+  { freq: 349.23, hold: 2 },
+  { freq: 0, hold: 1 },
+  { freq: 466.16, hold: 1 },
+  { freq: 293.66, hold: 2 },
+  { freq: 392, hold: 1 },
+  { freq: 329.63, hold: 2 },
+  { freq: 261.63, hold: 1 },
+  { freq: 0, hold: 2 },
+];
+const padPattern = [
+  { freq: 110, hold: 8 },
+  { freq: 98, hold: 8 },
+  { freq: 87.31, hold: 8 },
+  { freq: 98, hold: 8 },
+];
+const melodyTempoMs = 480;
+const musicVolume = 0.09;
+
+const updateMusicButton = () => {
+  if (!musicToggleButton) return;
+  musicToggleButton.textContent = `Musica: ${musicState.isPlaying ? "On" : "Off"}`;
+};
+
+const stopMusic = () => {
+  if (musicState.timers.length) {
+    musicState.timers.forEach((timer) => clearTimeout(timer));
+    musicState.timers = [];
+  }
+  if (musicState.lfoTimer) {
+    clearInterval(musicState.lfoTimer);
+    musicState.lfoTimer = null;
+  }
+  musicState.tracks.forEach((track) => {
+    if (track.oscillator) {
+      track.oscillator.stop();
+      track.oscillator.disconnect();
+    }
+    if (track.gain) {
+      track.gain.disconnect();
+    }
+  });
+  musicState.tracks = [];
+  if (musicState.masterGain) {
+    musicState.masterGain.disconnect();
+    musicState.masterGain = null;
+  }
+  musicState.isPlaying = false;
+  updateMusicButton();
+};
+
+const startMusic = () => {
+  if (!musicState.context) {
+    musicState.context = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (musicState.context.state === "suspended") {
+    musicState.context.resume();
+  }
+  if (musicState.isPlaying) return;
+  const context = musicState.context;
+  const masterGain = context.createGain();
+  masterGain.gain.setValueAtTime(1.25, context.currentTime);
+  masterGain.connect(context.destination);
+  musicState.masterGain = masterGain;
+  // No drums for the relaxed track.
+  const createTrack = (options) => {
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const pattern = options.pattern;
+    oscillator.type = options.wave;
+    oscillator.frequency.setValueAtTime(pattern[0].freq || 0, context.currentTime);
+    gain.gain.setValueAtTime(options.volume, context.currentTime);
+    oscillator.connect(gain);
+    gain.connect(masterGain);
+    oscillator.start();
+    return {
+      oscillator,
+      gain,
+      pattern,
+      tempo: options.tempo,
+      volume: options.volume,
+      vibratoDepth: options.vibratoDepth || 0,
+      step: 0,
+    };
+  };
+  musicState.tracks = [
+    createTrack({
+      pattern: melodyPattern,
+      tempo: melodyTempoMs,
+      wave: "triangle",
+      volume: musicVolume,
+      vibratoDepth: 10,
+    }),
+    createTrack({
+      pattern: padPattern,
+      tempo: melodyTempoMs,
+      wave: "triangle",
+      volume: musicVolume * 0.65,
+      vibratoDepth: 4,
+    }),
+  ];
+  musicState.lfoPhase = 0;
+  musicState.duckUntil = 0;
+  musicState.lfoTimer = setInterval(() => {
+    if (!musicState.masterGain || !musicState.context) return;
+    const now = musicState.context.currentTime;
+    if (now < musicState.duckUntil) return;
+    const lfo = 0.75 + 0.25 * Math.sin(musicState.lfoPhase);
+    musicState.masterGain.gain.setValueAtTime(1 * lfo, now);
+    musicState.tracks.forEach((track) => {
+      if (track.vibratoDepth && track.oscillator) {
+        const detune = track.vibratoDepth * Math.sin(musicState.lfoPhase * 0.6);
+        track.oscillator.detune.setValueAtTime(detune, now);
+      }
+    });
+    const padTrack = musicState.tracks[1];
+    if (padTrack?.gain) {
+      const padPulse = 0.85 + 0.15 * Math.sin(musicState.lfoPhase * 0.35);
+      padTrack.gain.gain.setValueAtTime(padTrack.volume * padPulse, now);
+    }
+    musicState.lfoPhase += 0.2;
+  }, 80);
+  const playStep = (track, trackIndex) => {
+    const step = track.pattern[track.step];
+    if (!step) return;
+    const now = context.currentTime;
+    if (step.freq > 0) {
+      track.oscillator.frequency.setValueAtTime(step.freq, now);
+      track.gain.gain.setValueAtTime(0, now);
+      track.gain.gain.linearRampToValueAtTime(track.volume, now + 0.05);
+      track.gain.gain.exponentialRampToValueAtTime(track.volume * 0.9, now + 0.4);
+    } else {
+      track.gain.gain.setValueAtTime(0, now);
+    }
+    track.step = (track.step + 1) % track.pattern.length;
+    musicState.timers[trackIndex] = setTimeout(
+      () => playStep(track, trackIndex),
+      track.tempo * (step.hold || 1),
+    );
+  };
+  musicState.tracks.forEach((track, index) => playStep(track, index));
+  musicState.isPlaying = true;
+  updateMusicButton();
+};
+
+const toggleMusic = () => {
+  if (musicState.isPlaying) {
+    stopMusic();
+  } else {
+    startMusic();
+  }
+};
+
+const getWinStreak = () => {
+  try {
+    const value = Number(localStorage.getItem(winStreakKey));
+    return Number.isFinite(value) ? value : 0;
+  } catch (error) {
+    console.error(error);
+    return 0;
+  }
+};
+
+const setWinStreak = (value) => {
+  try {
+    localStorage.setItem(winStreakKey, String(value));
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const buildClubFromPool = (pool, lineupCount) => {
+  const lineup = pool.slice(0, lineupCount);
+  const slotMap = new Map(lineup.map((player, index) => [player.dbId, index + 1]));
+  return pool.map((player) => {
+    const slot = slotMap.get(player.dbId);
+    if (slot) {
+      return {
+        ...player,
+        id: `p${slot}`,
+        dbId: player.dbId,
+        inLineup: true,
+        slot,
+        number: defaultNumbers[slot - 1] ?? null,
+        injuryMatches: player.injuryMatches ?? 0,
+        redCardMatches: player.redCardMatches ?? 0,
+      };
+    }
+    return {
+      ...player,
+      id: player.dbId,
+      dbId: player.dbId,
+      inLineup: false,
+      injuryMatches: player.injuryMatches ?? 0,
+      redCardMatches: player.redCardMatches ?? 0,
+    };
+  });
+};
+
+const buildWorstByPositionClub = (pool = databasePlayers) => {
+  if (!pool.length) return [];
+  const totalClub = Math.min(clubSize, pool.length);
+  const lineupCount = Math.min(11, totalClub);
+  const sorted = [...pool].sort((a, b) => (Number(a.rating) || 0) - (Number(b.rating) || 0));
+  const remaining = [...sorted];
+  const slots = Array.from({ length: lineupCount }, (_, i) => `p${i + 1}`);
+  const lineup = slots
+    .map((slotId, index) => {
+      const card = document.querySelector(`.player[data-player="${slotId}"]`);
+      const slotPos = card?.dataset.slotPos?.trim();
+      let pickIndex = -1;
+      if (slotPos) {
+        pickIndex = remaining.findIndex((player) => player.pos === slotPos);
+      }
+      if (pickIndex === -1) pickIndex = 0;
+      const picked = remaining.splice(pickIndex, 1)[0];
+      if (!picked) return null;
+      return {
+        ...picked,
+        id: `p${index + 1}`,
+        dbId: picked.dbId,
+        inLineup: true,
+        slot: index + 1,
+        number: defaultNumbers[index] ?? null,
+        injuryMatches: picked.injuryMatches ?? 0,
+        redCardMatches: picked.redCardMatches ?? 0,
+      };
+    })
+    .filter(Boolean);
+  const benchPool = remaining.slice(0, Math.max(0, totalClub - lineup.length));
+  const bench = benchPool.map((player) => ({
+    ...player,
+    id: player.dbId,
+    dbId: player.dbId,
+    inLineup: false,
+    injuryMatches: player.injuryMatches ?? 0,
+    redCardMatches: player.redCardMatches ?? 0,
+  }));
+  return [...lineup, ...bench];
+};
 
 const initSlotPositions = () => {
   document.querySelectorAll(".player[data-player]").forEach((card) => {
@@ -81,8 +370,10 @@ const isPositionMismatch = (player, slotPos) => {
 
 const getAdjustedRating = (player, slotPos) => {
   const base = Number(player?.rating) || 0;
-  if (!isPositionMismatch(player, slotPos)) return base;
-  return Math.max(0, base - ratingMismatchPenalty);
+  const mismatchPenalty = isPositionMismatch(player, slotPos) ? ratingMismatchPenalty : 0;
+  const injuryPenaltyValue = player?.injuryMatches > 0 ? injuryPenalty : 0;
+  if (player?.injuryMatches > 0 || player?.redCardMatches > 0) return 0;
+  return Math.max(0, base - mismatchPenalty - injuryPenaltyValue);
 };
 
 const getSlotPosForPlayer = (playerId) => {
@@ -122,9 +413,26 @@ const showScreen = (screenToShow, screenToHide) => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
+const canPlayMatch = () => {
+  const blocked = players.some((player) => player.inLineup && (player.injuryMatches > 0 || player.redCardMatches > 0));
+  if (blocked) {
+    if (playNote) playNote.textContent = "No puedes jugar: hay lesionados o sancionados en el 11.";
+    return false;
+  }
+  if (playNote) playNote.textContent = "";
+  return true;
+};
+
 playButton?.addEventListener("click", (event) => {
   event.preventDefault();
   showScreen(playScreen, homeScreen);
+});
+
+coverPlayButton?.addEventListener("click", (event) => {
+  event.preventDefault();
+  if (!coverScreen || !homeScreen) return;
+  setCoverMode(false);
+  showScreen(homeScreen, coverScreen);
 });
 
 backButton?.addEventListener("click", (event) => {
@@ -212,6 +520,11 @@ marketBackButton?.addEventListener("click", (event) => {
   showScreen(homeScreen, marketScreen);
 });
 
+musicToggleButton?.addEventListener("click", (event) => {
+  event.preventDefault();
+  toggleMusic();
+});
+
 document.addEventListener("click", (event) => {
   const playTarget = event.target.closest("#play-btn");
   const backTarget = event.target.closest("#back-btn");
@@ -263,11 +576,13 @@ document.addEventListener("click", (event) => {
   if (marketTarget) showScreen(market, home);
   if (marketBackTarget) showScreen(home, market);
   if (rivalTarget) {
+    if (!canPlayMatch()) return;
+    const rivalId = rivalTarget.getAttribute("data-id");
     const rivalName = rivalTarget.getAttribute("data-name") || "Rival";
     const difficulty = rivalTarget.getAttribute("data-difficulty") || "medium";
     const rivalRating = rivalTarget.getAttribute("data-rating");
     const winCoins = Number(rivalTarget.getAttribute("data-coins") || "0");
-    openResult(rivalName, difficulty, rivalRating, winCoins);
+    openResult(rivalId, rivalName, difficulty, rivalRating, winCoins);
   }
   if (formationPick) {
     const formationKey = formationPick.getAttribute("data-formation");
@@ -338,16 +653,121 @@ document.addEventListener("input", (event) => {
 const TEAM_RATING = 30;
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+const getTeamRatingValue = () => {
+  const current = Number(teamRating?.textContent);
+  if (Number.isFinite(current) && current > 0) return current;
+  const lineup = (players || []).filter((player) => player.inLineup);
+  if (lineup.length) {
+    const total = lineup.reduce((sum, player) => {
+      const slotPos = getSlotPosForPlayer(player.id);
+      return sum + getAdjustedRating(player, slotPos);
+    }, 0);
+    return Math.round(total / lineup.length);
+  }
+  return TEAM_RATING;
+};
+
+const rivalSlots = [
+  { slotClass: "top", difficulty: "hard", shieldClass: "shield-a" },
+  { slotClass: "mid-left", difficulty: "medium", shieldClass: "shield-b" },
+  { slotClass: "mid-right", difficulty: "medium", shieldClass: "shield-c" },
+  { slotClass: "bottom-left", difficulty: "easy", shieldClass: "shield-d" },
+  { slotClass: "bottom-center", difficulty: "easy", shieldClass: "shield-e" },
+  { slotClass: "bottom-right", difficulty: "easy", shieldClass: "shield-f" },
+];
+
+const rivalDifficultyConfig = {
+  easy: { minRating: 72, maxRating: 78, coins: 1000 },
+  medium: { minRating: 80, maxRating: 86, coins: 2000 },
+  hard: { minRating: 87, maxRating: 92, coins: 5000 },
+};
+
+const rivalNameParts = {
+  prefix: ["Union", "Club", "Deportivo", "Atletico", "Real", "Sporting", "Academia"],
+  core: ["Rayo", "Titan", "Lobo", "Cometa", "Tempestad", "Aurora", "Fenix", "Halcon", "Dragon", "Mirador"],
+  suffix: ["FC", "Norte", "Sur", "Central", "City", "Unido", "Rivales"],
+};
+
+let rivals = [];
+let rivalIdCounter = 0;
+
+const createRivalId = () => `r${rivalIdCounter++}`;
+
+const generateRivalName = (usedNames) => {
+  const { prefix, core, suffix } = rivalNameParts;
+  const maxTries = 20;
+  for (let i = 0; i < maxTries; i += 1) {
+    const name = `${prefix[randomInt(0, prefix.length - 1)]} ${core[randomInt(0, core.length - 1)]} ${suffix[randomInt(0, suffix.length - 1)]}`;
+    if (!usedNames.has(name)) {
+      usedNames.add(name);
+      return name;
+    }
+  }
+  const fallback = `${core[randomInt(0, core.length - 1)]} ${suffix[randomInt(0, suffix.length - 1)]}`;
+  usedNames.add(fallback);
+  return fallback;
+};
+
+const createRivalForSlot = (slot, usedNames) => {
+  const config = rivalDifficultyConfig[slot.difficulty];
+  const rating = randomInt(config.minRating, config.maxRating);
+  const coinsVariance = randomInt(-200, 200);
+  return {
+    id: createRivalId(),
+    name: generateRivalName(usedNames),
+    difficulty: slot.difficulty,
+    rating,
+    coins: Math.max(200, config.coins + coinsVariance),
+    slotClass: slot.slotClass,
+    shieldClass: slot.shieldClass,
+  };
+};
+
+const generateRivalsBatch = () => {
+  const usedNames = new Set();
+  return rivalSlots.map((slot) => createRivalForSlot(slot, usedNames));
+};
+
+const renderRivals = () => {
+  if (!rivalsPyramid) return;
+  rivalsPyramid.innerHTML = rivals
+    .map(
+      (rival) => `
+        <div class="rival-card ${rival.difficulty} ${rival.slotClass}" data-id="${rival.id}" data-name="${rival.name}" data-difficulty="${rival.difficulty}" data-rating="${rival.rating}" data-coins="${rival.coins}">
+          <div class="rival-shield ${rival.shieldClass}"></div>
+          ${rival.name}<br /><small>${rival.rating}</small>
+          <div class="rival-coins">${rival.coins.toLocaleString("es-ES")}</div>
+        </div>
+      `
+    )
+    .join("");
+};
+
+const initRivals = () => {
+  rivals = generateRivalsBatch();
+  renderRivals();
+};
+
+const removeRival = (rivalId) => {
+  if (!rivalId) return;
+  rivals = rivals.filter((rival) => rival.id !== rivalId);
+  if (!rivals.length) {
+    rivals = generateRivalsBatch();
+  }
+  renderRivals();
+};
 
 const getChances = (difficulty, rivalRating) => {
-  let baseWin = 0.55;
-  if (difficulty === "easy") baseWin = 0.8;
-  if (difficulty === "hard") baseWin = 0.3;
+  let baseWin = 0.5;
+  if (difficulty === "easy") baseWin = 0.7;
+  if (difficulty === "hard") baseWin = 0.25;
 
-  const ratingDiff = TEAM_RATING - (Number(rivalRating) || 80);
+  const ratingDiff = getTeamRatingValue() - (Number(rivalRating) || 80);
   const adjustedWin = clamp(baseWin + ratingDiff * 0.01, 0.05, 0.9);
-  const draw = 0.1;
-  const win = Math.min(adjustedWin, 0.9 - draw);
+  const draw = 0.25;
+  const win = Math.min(adjustedWin, 0.85 - draw);
 
   return { win, draw };
 };
@@ -356,7 +776,8 @@ const addCoins = (amount) => {
   const current = Number(coinAmount?.textContent || "0");
   const total = current + amount;
   if (coinAmount) coinAmount.textContent = String(total);
-  if (coinDelta) coinDelta.textContent = `+${amount}`;
+  if (coinDelta) coinDelta.textContent = amount ? `${amount > 0 ? "+" : ""}${amount}` : "";
+  if (total <= 0) handleBankrupt();
 };
 
 const hidePanels = () => {
@@ -365,27 +786,114 @@ const hidePanels = () => {
   losePanel?.classList.add("screen-hidden");
 };
 
-const setPanel = (panel, suffix, rivalName, left, right, reward) => {
+const setPanel = (panel, suffix, rivalName, left, right, rewardText) => {
   if (!panel) return;
   const rivalEl = panel.querySelector(`#${suffix}-rival`);
   const leftEl = panel.querySelector(`#${suffix}-left`);
   const rightEl = panel.querySelector(`#${suffix}-right`);
   const rewardEl = panel.querySelector(`#${suffix}-reward`);
+  const scoreEl = panel.querySelector(`#${suffix}-score`);
   if (!rivalEl || !leftEl || !rightEl || !rewardEl) return;
   rivalEl.textContent = rivalName;
   leftEl.textContent = `${left}%`;
   rightEl.textContent = `${right}%`;
-  rewardEl.textContent = `Premio: ${reward} monedas`;
+  rewardEl.textContent = rewardText;
+  if (scoreEl) scoreEl.textContent = "0 - 0";
   panel.classList.remove("screen-hidden");
 };
 
-const openResult = (rivalName, difficulty, rivalRating, winCoins) => {
+const createScore = (outcome) => {
+  if (outcome === "win") {
+    const home = randomInt(1, 4);
+    const away = randomInt(0, Math.max(0, home - 1));
+    return [home, away];
+  }
+  if (outcome === "lose") {
+    const away = randomInt(1, 4);
+    const home = randomInt(0, Math.max(0, away - 1));
+    return [home, away];
+  }
+  const goals = randomInt(0, 3);
+  return [goals, goals];
+};
+
+const setScore = (suffix, home, away) => {
+  const scoreEl = document.querySelector(`#${suffix}-score`);
+  if (!scoreEl) return;
+  scoreEl.textContent = `${home} - ${away}`;
+};
+
+const handleMatchIncidents = () => {
+  if (!players.length) return "";
+  players.forEach((player) => {
+    if (!player.inLineup && player.injuryMatches > 0) {
+      player.injuryMatches = Math.max(0, player.injuryMatches - 1);
+    }
+    if (!player.inLineup && player.redCardMatches > 0) {
+      player.redCardMatches = Math.max(0, player.redCardMatches - 1);
+    }
+  });
+  let note = "";
+  const candidates = players.filter(
+    (player) => player.inLineup && player.injuryMatches === 0 && player.redCardMatches === 0
+  );
+  if (candidates.length && Math.random() < injuryChance) {
+    const injured = candidates[Math.floor(Math.random() * candidates.length)];
+    injured.injuryMatches = injuryMatchesDefault;
+    note = ` | Lesion: ${injured.name} (${injuryMatchesDefault} partidos)`;
+  }
+  const cardCandidates = players.filter(
+    (player) => player.inLineup && player.redCardMatches === 0 && player.injuryMatches === 0
+  );
+  if (cardCandidates.length && Math.random() < redCardChance) {
+    const booked = cardCandidates[Math.floor(Math.random() * cardCandidates.length)];
+    booked.redCardMatches = redCardMatchesDefault;
+    note += ` | Roja: ${booked.name} (${redCardMatchesDefault} partido)`;
+  }
+  syncLineupCards();
+  renderClub();
+  renderPlantillaBench();
+  updateTeamRating();
+  persistState();
+  return note;
+};
+
+const resetClubToWorst = () => {
+  if (!databasePlayers.length) return;
+  players = buildWorstByPositionClub();
+  marketPlayers = databasePlayers.filter((player) => !players.some((item) => item.dbId === player.dbId));
+  syncLineupCards();
+  players.filter((player) => player.inLineup).forEach((player) => {
+    updateDorsalDisplay(player.id, player.number);
+  });
+  renderClub();
+  renderDorsalList();
+  renderPlantillaBench();
+  renderMarket();
+  updateTeamRating();
+  persistState();
+};
+
+const handleBankrupt = () => {
+  if (isResettingBankrupt) return;
+  isResettingBankrupt = true;
+  setWinStreak(0);
+  resetClubToWorst();
+  if (coinAmount) coinAmount.textContent = String(startingCoins);
+  if (coinDelta) coinDelta.textContent = "";
+  if (clubNote) clubNote.textContent = "Te quedaste sin monedas. Reinicio.";
+  if (marketNote) marketNote.textContent = "Club reiniciado por bancarrota.";
+  isResettingBankrupt = false;
+};
+
+const openResult = (rivalId, rivalName, difficulty, rivalRating, winCoins) => {
   const { win, draw } = getChances(difficulty, rivalRating);
   const lose = 1 - win - draw;
   const roll = Math.random();
   let left = 50;
   let right = 50;
   let reward = 0;
+  const injuryNote = handleMatchIncidents();
 
   hidePanels();
 
@@ -393,30 +901,42 @@ const openResult = (rivalName, difficulty, rivalRating, winCoins) => {
     left = Math.floor(51 + Math.random() * 30);
     right = 100 - left;
     reward = winCoins;
-    setPanel(winPanel, "win", rivalName, left, right, reward);
+    const [homeGoals, awayGoals] = createScore("win");
+    let streak = getWinStreak() + 1;
+    let streakText = "";
+    if (streak >= winStreakTarget) {
+      const streakReward = awardStreakPackReward();
+      reward += winStreakCoins;
+      streak = 0;
+      if (streakReward.player) {
+        streakText = ` | Bonus racha: +${winStreakCoins} monedas y ${streakReward.packName} (${streakReward.player.name})`;
+      } else {
+        streakText = ` | Bonus racha: +${winStreakCoins} monedas y ${streakReward.packName}`;
+      }
+    }
+    setWinStreak(streak);
+    setPanel(winPanel, "win", rivalName, left, right, `Premio: ${reward} monedas${streakText}${injuryNote}`);
+    setScore("win", homeGoals, awayGoals);
+    removeRival(rivalId);
   } else if (roll < win + draw) {
     left = 50;
     right = 50;
     reward = 500;
-    setPanel(drawPanel, "draw", rivalName, left, right, reward);
+    const [homeGoals, awayGoals] = createScore("draw");
+    setWinStreak(0);
+    setPanel(drawPanel, "draw", rivalName, left, right, `Premio: ${reward} monedas${injuryNote}`);
+    setScore("draw", homeGoals, awayGoals);
   } else if (roll < win + draw + lose) {
     right = Math.floor(51 + Math.random() * 30);
     left = 100 - right;
-    reward = 200;
-    setPanel(losePanel, "lose", rivalName, left, right, reward);
+    reward = -200;
+    const [homeGoals, awayGoals] = createScore("lose");
+    setWinStreak(0);
+    setPanel(losePanel, "lose", rivalName, left, right, `Premio: ${reward} monedas${injuryNote}`);
+    setScore("lose", homeGoals, awayGoals);
   }
   addCoins(reward);
 };
-
-rivalCards.forEach((card) => {
-  card.addEventListener("click", () => {
-    const rivalName = card.getAttribute("data-name") || "Rival";
-    const difficulty = card.getAttribute("data-difficulty") || "medium";
-    const rivalRating = card.getAttribute("data-rating");
-    const winCoins = Number(card.getAttribute("data-coins") || "0");
-    openResult(rivalName, difficulty, rivalRating, winCoins);
-  });
-});
 
 resultCloseButtons.forEach((button) => {
   button.addEventListener("click", hidePanels);
@@ -489,6 +1009,9 @@ formationButtons.forEach((button) => {
 let databasePlayers = [];
 let players = [];
 let marketPlayers = [];
+let basePlayers = [];
+let pocoPlayers = [];
+let legendPlayers = [];
 let selectedSwap = null;
 let draggedBenchId = null;
 let plantillaSearchQuery = "";
@@ -496,7 +1019,7 @@ let plantillaPosQuery = "";
 
 const defaultNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 const storageKey = "fc-players-state";
-const clubSize = Number.MAX_SAFE_INTEGER;
+const clubSize = 16;
 
 const positionMap = {
   portero: "POR",
@@ -506,6 +1029,9 @@ const positionMap = {
   "centrocampista": "MC",
   "centrocampista defensivo": "MCD",
   "mediocampista ofensivo": "MCO",
+  "centrocampista ofensivo": "MCO",
+  "mediocampista": "MC",
+  "medio centro": "MC",
   "delantero": "DC",
   "extremo izquierdo": "EI",
   "extremo derecho": "ED",
@@ -516,6 +1042,27 @@ const mapPosition = (raw) => {
   if (!raw) return "MC";
   const key = raw.trim().toLowerCase();
   return positionMap[key] || "MC";
+};
+
+const normalizePositionText = (raw) => {
+  if (!raw) return "";
+  const first = raw
+    .split(/[\/,\-]/)
+    .map((part) => part.trim())
+    .find(Boolean);
+  return first || raw.trim();
+};
+
+const normalizeRating = (raw) => {
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return 0;
+  const scaled = value <= 10 ? value * 10 : value;
+  return Math.min(99, Math.round(scaled));
+};
+
+const normalizeClub = (raw, fallback) => {
+  if (typeof raw === "string" && raw.trim()) return raw.trim();
+  return fallback;
 };
 
 const getSurname = (name) => {
@@ -536,25 +1083,32 @@ const getClubAbbr = (club) => {
   return `${words[0][0]}${words[1][0]}`.toUpperCase();
 };
 
-const toPlayerRecord = (raw, index) => ({
-  id: `db${index + 1}`,
-  dbId: `db${index + 1}`,
-  name: raw.nombre,
-  pos: mapPosition(raw.posicion),
-  posFull: raw.posicion,
-  rating: raw.valoracion,
-  club: raw.equipo,
-  inLineup: false,
-  number: null,
-});
+const toPlayerRecord = (raw, index, prefix, fallbackClub) => {
+  const posText = normalizePositionText(raw.posicion);
+  return {
+    id: `${prefix}-${index + 1}`,
+    dbId: `${prefix}-${index + 1}`,
+    name: raw.nombre || `Jugador ${index + 1}`,
+    pos: mapPosition(posText),
+    posFull: raw.posicion || posText || "Mediocampista",
+    rating: normalizeRating(raw.valoracion),
+    club: normalizeClub(raw.equipo, fallbackClub),
+    inLineup: false,
+    number: null,
+    injuryMatches: 0,
+    redCardMatches: 0,
+  };
+};
 
 const persistState = () => {
   try {
     const payload = {
-      players: players.map(({ dbId, id, inLineup, number }) => ({
+      players: players.map(({ dbId, id, inLineup, number, injuryMatches, redCardMatches }) => ({
         dbId,
         inLineup,
         number,
+        injuryMatches: Number(injuryMatches) || 0,
+        redCardMatches: Number(redCardMatches) || 0,
         slot: inLineup && id.startsWith("p") ? Number(id.slice(1)) : null,
       })),
     };
@@ -580,6 +1134,8 @@ const restoreState = (records) => {
           inLineup: Boolean(item.inLineup),
           number: Number.isFinite(Number(item.number)) ? Number(item.number) : null,
           slot: Number.isFinite(Number(item.slot)) ? Number(item.slot) : null,
+          injuryMatches: Number.isFinite(Number(item.injuryMatches)) ? Number(item.injuryMatches) : 0,
+          redCardMatches: Number.isFinite(Number(item.redCardMatches)) ? Number(item.redCardMatches) : 0,
         };
       })
       .filter(Boolean);
@@ -597,6 +1153,16 @@ const syncLineupCards = () => {
       const cards = document.querySelectorAll(`[data-player="${player.id}"]`);
       if (!cards.length) return;
       cards.forEach((card) => {
+        const ensureBadge = (type) => {
+          let badge = card.querySelector(`.status-badge.${type}`);
+          if (!badge) {
+            badge = document.createElement("span");
+            badge.className = `status-badge ${type}`;
+            badge.setAttribute("aria-hidden", "true");
+            card.appendChild(badge);
+          }
+          return badge;
+        };
         card.classList.remove("tier-collision", "tier-mystic", "tier-future");
         const posEl = card.querySelector(".pos-text");
         const nameEl = card.querySelector(".player-name");
@@ -610,6 +1176,18 @@ const syncLineupCards = () => {
         if (ratingEl) ratingEl.textContent = String(adjustedRating);
         card.setAttribute("data-rating", String(adjustedRating));
         card.classList.toggle("pos-mismatch", mismatch);
+        card.classList.toggle("injured", player.injuryMatches > 0);
+        card.classList.toggle("suspended", player.redCardMatches > 0);
+        if (player.injuryMatches > 0) {
+          ensureBadge("injury");
+        } else {
+          card.querySelector(".status-badge.injury")?.remove();
+        }
+        if (player.redCardMatches > 0) {
+          ensureBadge("red");
+        } else {
+          card.querySelector(".status-badge.red")?.remove();
+        }
         const tier = getTierByRating(adjustedRating);
         if (tier) card.classList.add(tier);
       });
@@ -669,86 +1247,13 @@ const getTierByRating = (rating) => {
   return null;
 };
 
-const initPlayersFromDatabase = (data) => {
-  databasePlayers = data.map(toPlayerRecord);
-  let restored = restoreState(databasePlayers);
-  if (restored) {
-    const requiredClub = Math.min(clubSize, databasePlayers.length);
-    const requiredLineup = Math.min(11, requiredClub);
-    const lineup = restored
-      .filter((player) => player.inLineup && player.slot)
-      .sort((a, b) => a.slot - b.slot);
-    if (lineup.length < requiredLineup || restored.length < requiredClub) restored = null;
-  }
-  if (restored) {
-    const totalClub = Math.min(clubSize, databasePlayers.length);
-    const lineupLimit = Math.min(11, totalClub);
-    const club = [];
-    const used = new Set();
-    const addPlayer = (player, inLineup = false, slot = null) => {
-      if (!player || club.length >= totalClub || used.has(player.dbId)) return;
-      club.push({
-        ...player,
-        inLineup,
-        slot: inLineup ? slot : null,
-        number: inLineup ? player.number ?? defaultNumbers[(slot ?? 1) - 1] ?? null : player.number ?? null,
-      });
-      used.add(player.dbId);
-    };
-    const lineup = restored
-      .filter((player) => player.inLineup && player.slot)
-      .sort((a, b) => a.slot - b.slot);
-    lineup.forEach((player) => addPlayer(player, true, player.slot));
-    restored.forEach((player) => addPlayer(player, false, null));
-    if (club.length < totalClub) {
-      shuffle(databasePlayers).forEach((player) => addPlayer(player, false, null));
-    }
-    let currentLineup = club.filter((player) => player.inLineup).length;
-    if (currentLineup < lineupLimit) {
-      club
-        .filter((player) => !player.inLineup)
-        .slice(0, lineupLimit - currentLineup)
-        .forEach((player, index) => {
-          const slot = currentLineup + index + 1;
-          player.inLineup = true;
-          player.slot = slot;
-          if (!player.number) player.number = defaultNumbers[slot - 1] ?? null;
-        });
-    }
-    club
-      .filter((player) => player.inLineup)
-      .sort((a, b) => (a.slot ?? 0) - (b.slot ?? 0))
-      .forEach((player, index) => {
-        player.slot = index + 1;
-        if (!player.number) player.number = defaultNumbers[index] ?? null;
-      });
-    players = club.map((player) => ({
-      ...player,
-      id: player.inLineup ? `p${player.slot}` : player.dbId,
-      dbId: player.dbId,
-    }));
-  } else {
-    const totalClub = Math.min(clubSize, databasePlayers.length);
-    const lineupCount = Math.min(11, totalClub);
-    const shuffled = shuffle(databasePlayers);
-    const clubPool = shuffled.slice(0, totalClub);
-    const lineupOrder = shuffle(clubPool).slice(0, lineupCount);
-    const slotMap = new Map(lineupOrder.map((player, index) => [player.dbId, index + 1]));
-    players = clubPool.map((player) => {
-      const slot = slotMap.get(player.dbId);
-      if (slot) {
-        return {
-          ...player,
-          id: `p${slot}`,
-          dbId: player.dbId,
-          inLineup: true,
-          slot,
-          number: defaultNumbers[slot - 1] ?? null,
-        };
-      }
-      return { ...player, id: player.dbId, dbId: player.dbId, inLineup: false };
-    });
-  }
+const initPlayersFromDatabase = ({ base = [], poco = [], legends = [] }) => {
+  basePlayers = base.map((raw, index) => toPlayerRecord(raw, index, "base", "Libre"));
+  pocoPlayers = poco.map((raw, index) => toPlayerRecord(raw, index, "poco", "Libre"));
+  legendPlayers = legends.map((raw, index) => toPlayerRecord(raw, index, "legend", "Leyendas"));
+  databasePlayers = [...basePlayers, ...pocoPlayers, ...legendPlayers];
+  const initialPool = pocoPlayers.length ? pocoPlayers : databasePlayers;
+  players = buildWorstByPositionClub(initialPool);
   marketPlayers = databasePlayers.filter((player) => !players.some((item) => item.dbId === player.dbId));
   syncLineupCards();
   players.filter((player) => player.inLineup).forEach((player) => {
@@ -768,19 +1273,30 @@ const renderClub = () => {
   clubList.innerHTML = clubPlayers
     .map(
       (player) => `
-        <div class="club-card ${player.inLineup ? "lineup" : ""} ${getTierByRating(player.rating) ?? ""}" data-id="${player.dbId}">
-          <div class="player-tag">${player.inLineup ? "XI" : player.pos}</div>
+        <div class="club-card ${player.inLineup ? "lineup" : ""} ${getTierByRating(player.rating) ?? ""} ${player.injuryMatches > 0 ? "injured" : ""} ${player.redCardMatches > 0 ? "suspended" : ""}" data-id="${player.dbId}">
+          <div class="player-tag">
+            ${player.inLineup ? "11" : player.pos}
+            ${player.injuryMatches > 0 ? `<span class="status-badge injury"></span>` : ""}
+            ${player.redCardMatches > 0 ? `<span class="status-badge red"></span>` : ""}
+          </div>
           <div class="player-info">
             <div class="player-name">${player.name}</div>
             <div class="player-pos">${player.posFull ?? player.pos}</div>
             <div class="player-rating-small">Media ${player.rating}</div>
           </div>
           <div class="player-rating">${player.rating}</div>
+          ${player.injuryMatches > 0 ? `<div class="player-injury">Lesionado</div>` : ""}
+          ${player.redCardMatches > 0 ? `<div class="player-injury">Sancionado</div>` : ""}
+          ${
+            player.inLineup
+              ? ""
+              : `<button class="menu-btn small sell-btn" data-id="${player.dbId}">Vender ${calcPrice(player.rating)}</button>`
+          }
         </div>
       `
     )
     .join("");
-  if (clubNote) clubNote.textContent = "Ve a Plantilla para arrastrar jugadores al XI.";
+  if (clubNote) clubNote.textContent = "Puedes vender suplentes desde aqui.";
 };
 
 const updateDorsalDisplay = (playerId, number) => {
@@ -851,7 +1367,7 @@ const renderPlantillaBench = () => {
     if ((plantillaSearchQuery.trim() || plantillaPosQuery.trim()) && !benchPlayers.length) {
       plantillaNote.textContent = "No hay resultados para ese filtro.";
     } else {
-      plantillaNote.textContent = "Arrastra un jugador del club hacia una posicion del XI.";
+      plantillaNote.textContent = "Arrastra un jugador del club hacia una posicion del 11.";
     }
   }
 };
@@ -1091,12 +1607,49 @@ const rollRarity = (odds) => {
   return "common";
 };
 
-const pickPackPlayer = (rarity) => {
+const getPackPool = (packId) => {
+  const basePool = marketPlayers.length ? marketPlayers : databasePlayers;
+  if (packId === "legend") {
+    return basePool.filter((player) => String(player.dbId).startsWith("legend-"));
+  }
+  return basePool;
+};
+
+const pickPackPlayer = (rarity, packId) => {
   const [minRating, maxRating] = ratingRanges[rarity];
-  const filtered = marketPlayers.filter((player) => player.rating >= minRating && player.rating <= maxRating);
-  const pool = filtered.length ? filtered : marketPlayers;
+  const basePool = getPackPool(packId);
+  const filtered = basePool.filter((player) => player.rating >= minRating && player.rating <= maxRating);
+  const pool = filtered.length ? filtered : basePool;
   if (!pool.length) return null;
   return pool[Math.floor(Math.random() * pool.length)];
+};
+
+const awardStreakPackReward = () => {
+  const pack = storePacks.find((item) => item.id === winStreakPackId);
+  const packName = pack?.name ?? "Sobre especial";
+  if (!pack) return { packName, player: null };
+  const rarity = rollRarity(pack.odds);
+  const player = pickPackPlayer(rarity, pack.id);
+  if (!player) return { packName, player: null };
+  players.push({
+    id: player.id,
+    dbId: player.dbId ?? player.id,
+    name: player.name,
+    pos: player.pos,
+    posFull: player.posFull,
+    rating: player.rating,
+    club: player.club,
+    inLineup: false,
+    number: null,
+    rarity,
+    injuryMatches: 0,
+    redCardMatches: 0,
+  });
+  marketPlayers = marketPlayers.filter((item) => item.id !== player.id);
+  renderClub();
+  renderMarket();
+  persistState();
+  return { packName, player };
 };
 
 const formatOdds = (odds) => {
@@ -1145,6 +1698,7 @@ const getCoins = () => Number(coinAmount?.textContent || "0");
 const setCoins = (value, delta = 0) => {
   if (coinAmount) coinAmount.textContent = String(value);
   if (coinDelta) coinDelta.textContent = delta ? `${delta > 0 ? "+" : ""}${delta}` : "";
+  if (value <= 0) handleBankrupt();
 };
 
 const clampValue = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -1152,8 +1706,8 @@ const clampValue = (value, min, max) => Math.max(min, Math.min(max, value));
 const calcPrice = (rating) => {
   const minRating = 55;
   const maxRating = 115;
-  const minPrice = 1000;
-  const maxPrice = 1000000000;
+  const minPrice = 350;
+  const maxPrice = 999999;
   const clamped = clampValue(rating, minRating, maxRating);
   const ratio = (clamped - minRating) / (maxRating - minRating);
   return Math.round(minPrice + ratio * (maxPrice - minPrice));
@@ -1208,11 +1762,40 @@ const buyPlayer = (playerId) => {
     club: player.club,
     inLineup: false,
     number: null,
+    injuryMatches: 0,
+    redCardMatches: 0,
   });
   marketPlayers = marketPlayers.filter((item) => item.id !== player.id);
   renderMarket();
   renderClub();
   if (marketNote) marketNote.textContent = `Compraste a ${player.name}.`;
+  persistState();
+};
+
+const sellPlayer = (playerId) => {
+  const playerIndex = players.findIndex((player) => player.dbId === playerId && !player.inLineup);
+  if (playerIndex === -1) return;
+  const player = players[playerIndex];
+  const price = clampValue(Math.round(calcPrice(player.rating) * 0.6), 1000, 9999);
+  const coins = getCoins();
+  setCoins(coins + price, price);
+  players = players.filter((item) => item.dbId !== player.dbId);
+  if (!marketPlayers.some((item) => item.id === player.dbId)) {
+    marketPlayers.push({
+      id: player.dbId,
+      dbId: player.dbId,
+      name: player.name,
+      pos: player.pos,
+      posFull: player.posFull,
+      rating: player.rating,
+      club: player.club,
+      injuryMatches: player.injuryMatches ?? 0,
+      redCardMatches: player.redCardMatches ?? 0,
+    });
+  }
+  renderClub();
+  renderMarket();
+  if (clubNote) clubNote.textContent = `Vendiste a ${player.name}.`;
   persistState();
 };
 
@@ -1256,6 +1839,13 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("click", (event) => {
+  const sellTarget = event.target.closest(".sell-btn");
+  if (!sellTarget) return;
+  const playerId = sellTarget.getAttribute("data-id");
+  sellPlayer(playerId);
+});
+
+document.addEventListener("click", (event) => {
   const packTarget = event.target.closest(".pack-open");
   if (!packTarget) return;
   const packId = packTarget.getAttribute("data-pack");
@@ -1268,7 +1858,7 @@ document.addEventListener("click", (event) => {
   }
   setCoins(coins - pack.price, -pack.price);
   const rarity = rollRarity(pack.odds);
-  const player = pickPackPlayer(rarity);
+  const player = pickPackPlayer(rarity, packId);
   if (!player) {
     if (storeNote) storeNote.textContent = "No quedan jugadores disponibles.";
     return;
@@ -1284,6 +1874,8 @@ document.addEventListener("click", (event) => {
     inLineup: false,
     number: null,
     rarity,
+    injuryMatches: 0,
+    redCardMatches: 0,
   });
   marketPlayers = marketPlayers.filter((item) => item.id !== player.id);
   renderClub();
@@ -1321,22 +1913,32 @@ plantillaPosInput?.addEventListener("input", (event) => {
 });
 
 const loadDatabase = async () => {
-  try {
-    const response = await fetch("players.json");
-    if (!response.ok) throw new Error("players.json no disponible");
+  const fetchJson = async (url, label) => {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`${label} no disponible`);
     const data = await response.json();
-    if (!Array.isArray(data)) throw new Error("Formato invalido de players.json");
-    initPlayersFromDatabase(data);
+    if (!Array.isArray(data)) throw new Error(`Formato invalido de ${label}`);
+    return data;
+  };
+  try {
+    const [base, poco, legends] = await Promise.all([
+      fetchJson("players.json", "players.json"),
+      fetchJson("jugadores_poco_conocidos.json", "jugadores_poco_conocidos.json"),
+      fetchJson("leyendas_futbol.json", "leyendas_futbol.json"),
+    ]);
+    initPlayersFromDatabase({ base, poco, legends });
   } catch (error) {
     console.error(error);
-    if (marketNote) marketNote.textContent = "No se pudo cargar players.json.";
+    if (marketNote) marketNote.textContent = "No se pudo cargar la base de datos.";
     if (clubList) clubList.innerHTML = "";
   }
 };
 
 initSlotPositions();
+initRivals();
 loadDatabase();
 renderStore();
+setCoverMode(!coverScreen?.classList.contains("screen-hidden"));
 
 let activeDrag = null;
 

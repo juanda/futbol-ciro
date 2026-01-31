@@ -41,12 +41,27 @@ body.dragging {
     );
 }
 
+body.cover-mode .screen {
+  padding: 0;
+}
+
+body.cover-mode .top {
+  display: none;
+}
+
 .top {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 6px 0 10px;
   position: relative;
+}
+
+.music-toggle {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  padding: 8px 12px;
 }
 
 .brand {
@@ -136,6 +151,108 @@ body.dragging {
   display: none !important;
 }
 
+.cover {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.cover-card {
+  width: min(420px, 92vw);
+  padding: 28px 22px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.22), transparent 60%),
+    linear-gradient(135deg, rgba(16, 33, 22, 0.9), rgba(6, 12, 8, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.4);
+}
+
+.cover-card h1 {
+  margin: 10px 0 8px;
+  font-size: 34px;
+  letter-spacing: 1px;
+}
+
+.cover-illustration {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  margin: 12px 0 10px;
+}
+
+.cover-illustration svg {
+  width: min(360px, 90vw);
+  height: min(45vh, 360px);
+  display: block;
+}
+
+.cover-card p {
+  margin: 0 0 18px;
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.cover-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  background: rgba(239, 217, 150, 0.2);
+  color: #f3e3b1;
+  border: 1px solid rgba(243, 227, 177, 0.4);
+}
+
+.cover-btn {
+  width: 100%;
+  font-size: 16px;
+}
+
+.cover-instructions {
+  margin-top: 12px;
+}
+
+.cover-instructions summary {
+  list-style: none;
+}
+
+.cover-instructions summary::-webkit-details-marker {
+  display: none;
+}
+
+.cover-instructions-btn {
+  width: 100%;
+}
+
+.cover-instructions-body {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(10, 16, 12, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.cover-instructions-body p {
+  margin: 6px 0;
+}
+
+.cover-credit {
+  margin-bottom: 18px;
+  font-size: 12px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #f3e3b1;
+  opacity: 0.9;
+}
+
 .pitch-wrap {
   display: flex;
   justify-content: center;
@@ -183,6 +300,58 @@ body.dragging {
   user-select: none;
   -webkit-user-select: none;
   -webkit-user-drag: none;
+}
+
+.status-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 16px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.status-badge.injury {
+  background: #f1d8a6;
+  border: 1px solid #c59a5a;
+}
+
+.status-badge.injury::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: 5px;
+  height: 2px;
+  background: rgba(140, 96, 46, 0.6);
+}
+
+.status-badge.injury::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 7px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.status-badge.red {
+  width: 12px;
+  height: 16px;
+  border-radius: 2px;
+  background: #d23b3b;
+  border: 1px solid #7e1c1c;
+}
+
+.player.injured {
+  filter: grayscale(0.2);
+  box-shadow: 0 8px 14px rgba(120, 30, 30, 0.4);
+}
+
+.player.suspended {
+  filter: grayscale(0.3);
+  box-shadow: 0 8px 14px rgba(40, 40, 40, 0.35);
 }
 
 .player.tier-collision {
@@ -324,6 +493,15 @@ body.dragging {
   justify-items: center;
 }
 
+.play-note {
+  width: min(360px, 90vw);
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  color: #ffd4d4;
+  min-height: 18px;
+}
+
 .rivals-header {
   width: min(360px, 90vw);
   display: flex;
@@ -404,6 +582,7 @@ body.dragging {
   display: grid;
   place-items: center;
   font-weight: 800;
+  position: relative;
 }
 
 .club-card .player-info {
@@ -423,6 +602,20 @@ body.dragging {
 .club-card .player-rating {
   font-size: 18px;
   font-weight: 800;
+}
+
+.club-card.injured {
+  border: 1px solid rgba(255, 120, 120, 0.4);
+  box-shadow: 0 10px 18px rgba(120, 30, 30, 0.25);
+}
+
+.player-injury {
+  align-self: end;
+  margin-top: -8px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #ffb3b3;
 }
 
 .store {
@@ -569,6 +762,18 @@ body.dragging {
     radial-gradient(circle at 18% 30%, rgba(255, 255, 255, 0.55) 0 10%, transparent 12%),
     radial-gradient(circle at 72% 70%, rgba(210, 220, 235, 0.65) 0 18%, transparent 20%),
     linear-gradient(135deg, #3e4a59, #bcc5d0);
+}
+
+.pack-card.ballon {
+  background: linear-gradient(180deg, #fff6da, #f1c247);
+  color: #4a2f0f;
+}
+
+.pack-card.ballon .pack-visual {
+  background:
+    radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.65) 0 18%, transparent 20%),
+    radial-gradient(circle at 70% 70%, rgba(255, 215, 90, 0.65) 0 22%, transparent 24%),
+    linear-gradient(135deg, #9a6b15, #f7d07a);
 }
 
 .store-result {
@@ -1060,6 +1265,13 @@ body.dragging {
 .result-rival {
   margin: 0 0 14px;
   font-weight: 700;
+}
+
+.result-score {
+  margin: -8px 0 12px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 1px;
 }
 
 .result-bars {

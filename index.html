@@ -3,19 +3,20 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>FC Mobile - Inicio</title>
+    <title>FC - Inicio</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="screen">
       <header class="top">
         <div class="brand">
-          <span class="brand-title">FC Mobile</span>
+          <span class="brand-title">FC</span>
           <span class="brand-sub">Tu plantilla</span>
         </div>
+        <button class="menu-btn small music-toggle" id="music-toggle">Musica: Off</button>
         <div class="coin-display">
           <span class="coin-icon"></span>
-          <span class="coin-amount" id="coin-amount">200</span>
+          <span class="coin-amount" id="coin-amount">1000</span>
           <span class="coin-delta" id="coin-delta"></span>
         </div>
         <div class="rating-display">
@@ -24,7 +25,67 @@
         </div>
       </header>
 
-      <main class="content screen-main" id="home-screen">
+      <main class="content screen-main" id="cover-screen">
+        <section class="cover">
+          <div class="cover-card">
+            <div class="cover-badge">Modo Carrera</div>
+            <div class="cover-illustration" aria-hidden="true">
+              <svg viewBox="0 0 260 180" role="img">
+                <defs>
+                  <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#3b8d4f" />
+                    <stop offset="50%" stop-color="#2f7a42" />
+                    <stop offset="100%" stop-color="#256535" />
+                  </linearGradient>
+                  <pattern id="mow" width="18" height="18" patternUnits="userSpaceOnUse">
+                    <rect width="18" height="18" fill="none" />
+                    <rect x="0" y="0" width="9" height="9" fill="rgba(255,255,255,0.08)" />
+                    <rect x="9" y="9" width="9" height="9" fill="rgba(255,255,255,0.08)" />
+                  </pattern>
+                  <linearGradient id="postFace" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#ffffff" />
+                    <stop offset="100%" stop-color="#d9d9d9" />
+                  </linearGradient>
+                  <linearGradient id="postSide" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#cfcfcf" />
+                    <stop offset="100%" stop-color="#b3b3b3" />
+                  </linearGradient>
+                  <pattern id="net" width="10" height="10" patternUnits="userSpaceOnUse">
+                    <path d="M0 0H10M0 0V10" stroke="rgba(255,255,255,0.25)" stroke-width="1" />
+                  </pattern>
+                </defs>
+                <rect x="10" y="20" width="240" height="140" rx="18" fill="url(#grass)" />
+                <rect x="10" y="20" width="240" height="140" rx="18" fill="url(#mow)" />
+                <polygon points="60,50 200,50 214,60 74,60" fill="url(#postFace)" />
+                <polygon points="200,50 214,60 214,140 200,130" fill="url(#postSide)" />
+                <polygon points="60,50 74,60 74,140 60,130" fill="url(#postSide)" />
+                <rect x="74" y="60" width="140" height="80" fill="url(#net)" opacity="0.7" />
+                <line x1="74" y1="60" x2="214" y2="60" stroke="#ffffff" stroke-width="4" />
+                <line x1="74" y1="60" x2="74" y2="140" stroke="#ffffff" stroke-width="4" />
+                <line x1="214" y1="60" x2="214" y2="140" stroke="#ffffff" stroke-width="4" />
+                <line x1="74" y1="140" x2="214" y2="140" stroke="rgba(255,255,255,0.5)" stroke-width="3" />
+              </svg>
+            </div>
+            <h1>FC</h1>
+            <p>Arma tu 11, domina el mercado y sube en la piramide.</p>
+            <div class="cover-credit">Ciro + Codex</div>
+            <button class="menu-btn cover-btn" id="cover-play">Jugar</button>
+            <details class="cover-instructions">
+              <summary class="menu-btn small cover-instructions-btn">Instrucciones</summary>
+              <div class="cover-instructions-body">
+                <p>1. Elige un rival en Jugar y disputa el partido para ganar monedas segun la dificultad.</p>
+                <p>2. En Plantilla puedes arrastrar suplentes al 11 y ordenar tu equipo.</p>
+                <p>3. En Club puedes vender jugadores suplentes para conseguir monedas rapidas.</p>
+                <p>4. La Tienda te da sobres con jugadores nuevos; cuanto mejor el sobre, mejor la media.</p>
+                <p>5. Si tus monedas llegan a 0, reinicias con los peores por posicion y 1000 monedas.</p>
+                <p>6. Cada racha de 5 victorias te da un bonus extra de monedas y un sobre especial.</p>
+              </div>
+            </details>
+          </div>
+        </section>
+      </main>
+
+      <main class="content screen-main screen-hidden" id="home-screen">
         <section class="pitch-wrap">
           <div class="pitch">
             <div class="player p1" data-player="p1" data-rating="83"><span class="dorsal-text"></span><span class="pos-text">POR</span><div class="player-name"></div><small>83</small></div>
@@ -94,41 +155,11 @@
               Volver
             </button>
           </div>
+          <p class="play-note" id="play-note"></p>
 
           <div class="pitch-wrap">
             <div class="pitch play-pitch">
-              <div class="rivals-pyramid">
-                <div class="rival-card hard top" data-name="Dragones FC" data-difficulty="hard" data-rating="89" data-coins="5000">
-                  <div class="rival-shield shield-a"></div>
-                  Dragones FC<br /><small>89</small>
-                  <div class="rival-coins">5,000</div>
-                </div>
-                <div class="rival-card medium mid-left" data-name="Halcones Norte" data-difficulty="medium" data-rating="83" data-coins="2000">
-                  <div class="rival-shield shield-b"></div>
-                  Halcones Norte<br /><small>83</small>
-                  <div class="rival-coins">2,000</div>
-                </div>
-                <div class="rival-card medium mid-right" data-name="Titanes Azul" data-difficulty="medium" data-rating="85" data-coins="2000">
-                  <div class="rival-shield shield-c"></div>
-                  Titanes Azul<br /><small>85</small>
-                  <div class="rival-coins">2,000</div>
-                </div>
-                <div class="rival-card easy bottom-left" data-name="Lobos del Sur" data-difficulty="easy" data-rating="74" data-coins="1000">
-                  <div class="rival-shield shield-d"></div>
-                  Lobos del Sur<br /><small>74</small>
-                  <div class="rival-coins">1,000</div>
-                </div>
-                <div class="rival-card easy bottom-center" data-name="Cometas FC" data-difficulty="easy" data-rating="75" data-coins="1000">
-                  <div class="rival-shield shield-e"></div>
-                  Cometas FC<br /><small>75</small>
-                  <div class="rival-coins">1,000</div>
-                </div>
-                <div class="rival-card easy bottom-right" data-name="Rayos City" data-difficulty="easy" data-rating="76" data-coins="1000">
-                  <div class="rival-shield shield-f"></div>
-                  Rayos City<br /><small>76</small>
-                  <div class="rival-coins">1,000</div>
-                </div>
-              </div>
+              <div class="rivals-pyramid" id="rivals-pyramid"></div>
             </div>
           </div>
 
@@ -136,6 +167,7 @@
             <div class="result-card win">
               <h3>Ganas</h3>
               <p class="result-rival" id="win-rival">Rival</p>
+              <div class="result-score" id="win-score">0 - 0</div>
               <div class="result-bars">
                 <div class="result-side">
                   <span>Tu equipo</span>
@@ -155,6 +187,7 @@
             <div class="result-card draw">
               <h3>Empate</h3>
               <p class="result-rival" id="draw-rival">Rival</p>
+              <div class="result-score" id="draw-score">0 - 0</div>
               <div class="result-bars">
                 <div class="result-side">
                   <span>Tu equipo</span>
@@ -174,6 +207,7 @@
             <div class="result-card lose">
               <h3>Pierdes</h3>
               <p class="result-rival" id="lose-rival">Rival</p>
+              <div class="result-score" id="lose-score">0 - 0</div>
               <div class="result-bars">
                 <div class="result-side">
                   <span>Tu equipo</span>
@@ -318,7 +352,7 @@
           </div>
 
           <div class="plantilla-bench" id="plantilla-bench"></div>
-          <p class="plantilla-note" id="plantilla-note">Selecciona un jugador del XI y luego uno del club para cambiar.</p>
+          <p class="plantilla-note" id="plantilla-note">Selecciona un jugador del 11 y luego uno del club para cambiar.</p>
         </section>
       </main>
 
