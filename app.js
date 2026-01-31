@@ -76,13 +76,7 @@ if (coinAmount) coinAmount.textContent = String(startingCoins);
 let isResettingBankrupt = false;
 
 const musicState = {
-  context: null,
-  masterGain: null,
-  tracks: [],
-  timers: [],
-  lfoTimer: null,
-  lfoPhase: 0,
-  duckUntil: 0,
+  audio: null,
   isPlaying: false,
 };
 
@@ -90,40 +84,7 @@ const setCoverMode = (active) => {
   document.body.classList.toggle("cover-mode", active);
 };
 
-const melodyPattern = [
-  { freq: 392, hold: 1 },
-  { freq: 261.63, hold: 2 },
-  { freq: 440, hold: 1 },
-  { freq: 293.66, hold: 2 },
-  { freq: 349.23, hold: 1 },
-  { freq: 0, hold: 1 },
-  { freq: 329.63, hold: 1 },
-  { freq: 493.88, hold: 2 },
-  { freq: 293.66, hold: 1 },
-  { freq: 392, hold: 2 },
-  { freq: 277.18, hold: 1 },
-  { freq: 0, hold: 1 },
-  { freq: 523.25, hold: 2 },
-  { freq: 329.63, hold: 1 },
-  { freq: 415.3, hold: 2 },
-  { freq: 261.63, hold: 1 },
-  { freq: 349.23, hold: 2 },
-  { freq: 0, hold: 1 },
-  { freq: 466.16, hold: 1 },
-  { freq: 293.66, hold: 2 },
-  { freq: 392, hold: 1 },
-  { freq: 329.63, hold: 2 },
-  { freq: 261.63, hold: 1 },
-  { freq: 0, hold: 2 },
-];
-const padPattern = [
-  { freq: 110, hold: 8 },
-  { freq: 98, hold: 8 },
-  { freq: 87.31, hold: 8 },
-  { freq: 98, hold: 8 },
-];
-const melodyTempoMs = 480;
-const musicVolume = 0.09;
+const musicVolume = 0.35;
 
 const updateMusicButton = () => {
   if (!musicToggleButton) return;
@@ -131,124 +92,31 @@ const updateMusicButton = () => {
 };
 
 const stopMusic = () => {
-  if (musicState.timers.length) {
-    musicState.timers.forEach((timer) => clearTimeout(timer));
-    musicState.timers = [];
-  }
-  if (musicState.lfoTimer) {
-    clearInterval(musicState.lfoTimer);
-    musicState.lfoTimer = null;
-  }
-  musicState.tracks.forEach((track) => {
-    if (track.oscillator) {
-      track.oscillator.stop();
-      track.oscillator.disconnect();
-    }
-    if (track.gain) {
-      track.gain.disconnect();
-    }
-  });
-  musicState.tracks = [];
-  if (musicState.masterGain) {
-    musicState.masterGain.disconnect();
-    musicState.masterGain = null;
+  if (musicState.audio) {
+    musicState.audio.pause();
+    musicState.audio.currentTime = 0;
   }
   musicState.isPlaying = false;
   updateMusicButton();
 };
 
 const startMusic = () => {
-  if (!musicState.context) {
-    musicState.context = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (musicState.context.state === "suspended") {
-    musicState.context.resume();
-  }
   if (musicState.isPlaying) return;
-  const context = musicState.context;
-  const masterGain = context.createGain();
-  masterGain.gain.setValueAtTime(1.25, context.currentTime);
-  masterGain.connect(context.destination);
-  musicState.masterGain = masterGain;
-  // No drums for the relaxed track.
-  const createTrack = (options) => {
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-    const pattern = options.pattern;
-    oscillator.type = options.wave;
-    oscillator.frequency.setValueAtTime(pattern[0].freq || 0, context.currentTime);
-    gain.gain.setValueAtTime(options.volume, context.currentTime);
-    oscillator.connect(gain);
-    gain.connect(masterGain);
-    oscillator.start();
-    return {
-      oscillator,
-      gain,
-      pattern,
-      tempo: options.tempo,
-      volume: options.volume,
-      vibratoDepth: options.vibratoDepth || 0,
-      step: 0,
-    };
-  };
-  musicState.tracks = [
-    createTrack({
-      pattern: melodyPattern,
-      tempo: melodyTempoMs,
-      wave: "triangle",
-      volume: musicVolume,
-      vibratoDepth: 10,
-    }),
-    createTrack({
-      pattern: padPattern,
-      tempo: melodyTempoMs,
-      wave: "triangle",
-      volume: musicVolume * 0.65,
-      vibratoDepth: 4,
-    }),
-  ];
-  musicState.lfoPhase = 0;
-  musicState.duckUntil = 0;
-  musicState.lfoTimer = setInterval(() => {
-    if (!musicState.masterGain || !musicState.context) return;
-    const now = musicState.context.currentTime;
-    if (now < musicState.duckUntil) return;
-    const lfo = 0.75 + 0.25 * Math.sin(musicState.lfoPhase);
-    musicState.masterGain.gain.setValueAtTime(1 * lfo, now);
-    musicState.tracks.forEach((track) => {
-      if (track.vibratoDepth && track.oscillator) {
-        const detune = track.vibratoDepth * Math.sin(musicState.lfoPhase * 0.6);
-        track.oscillator.detune.setValueAtTime(detune, now);
-      }
+  if (!musicState.audio) {
+    const audio = new Audio("musica1.mp3");
+    audio.loop = true;
+    audio.volume = musicVolume;
+    musicState.audio = audio;
+  }
+  musicState.audio
+    .play()
+    .then(() => {
+      musicState.isPlaying = true;
+      updateMusicButton();
+    })
+    .catch((error) => {
+      console.error(error);
     });
-    const padTrack = musicState.tracks[1];
-    if (padTrack?.gain) {
-      const padPulse = 0.85 + 0.15 * Math.sin(musicState.lfoPhase * 0.35);
-      padTrack.gain.gain.setValueAtTime(padTrack.volume * padPulse, now);
-    }
-    musicState.lfoPhase += 0.2;
-  }, 80);
-  const playStep = (track, trackIndex) => {
-    const step = track.pattern[track.step];
-    if (!step) return;
-    const now = context.currentTime;
-    if (step.freq > 0) {
-      track.oscillator.frequency.setValueAtTime(step.freq, now);
-      track.gain.gain.setValueAtTime(0, now);
-      track.gain.gain.linearRampToValueAtTime(track.volume, now + 0.05);
-      track.gain.gain.exponentialRampToValueAtTime(track.volume * 0.9, now + 0.4);
-    } else {
-      track.gain.gain.setValueAtTime(0, now);
-    }
-    track.step = (track.step + 1) % track.pattern.length;
-    musicState.timers[trackIndex] = setTimeout(
-      () => playStep(track, trackIndex),
-      track.tempo * (step.hold || 1),
-    );
-  };
-  musicState.tracks.forEach((track, index) => playStep(track, index));
-  musicState.isPlaying = true;
-  updateMusicButton();
 };
 
 const toggleMusic = () => {
