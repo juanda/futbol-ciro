@@ -1,0 +1,9 @@
+{
+  "name": "futbol-ciro",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run dev-server.js",
+    "build": "bun run build.js"
+  }
+}
