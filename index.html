@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>FC - Inicio</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#0f1a14" />
   </head>
   <body>
     <div class="screen">
@@ -413,5 +415,18 @@
     </div>
 
     <script src="app.js"></script>
+    <script>
+      const basePath = "/futbol-ciro/";
+      const manifestLink = document.querySelector('link[rel="manifest"]');
+      if (manifestLink) {
+        manifestLink.setAttribute("href", `${basePath}manifest.webmanifest`);
+      }
+
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register(`${basePath}service-worker.js`, { scope: basePath });
+        });
+      }
+    </script>
   </body>
 </html>
