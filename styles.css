@@ -460,6 +460,142 @@ body.cover-mode .top {
   gap: 12px;
 }
 
+.daily-objectives {
+  width: min(360px, 90vw);
+  margin: 6px auto 0;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(11, 20, 14, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.daily-objectives h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.daily-list {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.daily-item.done {
+  color: #b9f6ae;
+}
+
+.daily-note {
+  margin: 8px 0 0;
+  min-height: 16px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.manager-progress {
+  width: min(360px, 90vw);
+  margin: 6px auto 0;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(16, 23, 34, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.manager-progress h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.manager-level,
+.manager-xp {
+  margin: 0;
+  font-size: 13px;
+}
+
+.achievement-list {
+  margin-top: 8px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.achievement-badge {
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.season-stats {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 10px;
+  font-size: 12px;
+}
+
+.manager-note {
+  margin: 8px 0 0;
+  min-height: 16px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.competition-progress {
+  width: min(360px, 90vw);
+  margin: 6px auto 0;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(33, 20, 14, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.competition-header {
+  display: grid;
+  gap: 8px;
+}
+
+.competition-header h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.competition-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.competition-note {
+  margin: 8px 0;
+  min-height: 16px;
+  font-size: 12px;
+}
+
+.league-table {
+  display: grid;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.league-row {
+  display: grid;
+  grid-template-columns: 18px 1fr 28px 22px 22px;
+  gap: 6px;
+  align-items: center;
+  padding: 3px 0;
+}
+
+.league-row.me {
+  color: #ffe39d;
+  font-weight: 700;
+}
+
+.cup-status {
+  margin-top: 8px;
+  font-size: 12px;
+}
+
 .menu-btn {
   border: none;
   border-radius: 14px;

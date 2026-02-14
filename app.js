@@ -36,6 +36,11 @@ const storeResultMeta = document.querySelector("#store-result-meta");
 const storeResultRating = document.querySelector("#store-result-rating");
 const dorsalButton = document.querySelector("#dorsal-btn");
 const dorsalBackButton = document.querySelector("#dorsal-back");
+const autoLineupButton = document.querySelector("#auto-lineup-btn");
+const saveProgressButton = document.querySelector("#save-progress-btn");
+const loadProgressButton = document.querySelector("#load-progress-btn");
+const deleteProgressButton = document.querySelector("#delete-progress-btn");
+const resetProgressButton = document.querySelector("#reset-progress-btn");
 const dorsalScreen = document.querySelector("#dorsal-screen");
 const dorsalList = document.querySelector("#dorsal-list");
 const dorsalNote = document.querySelector("#dorsal-note");
@@ -59,6 +64,18 @@ const marketSortButtons = document.querySelectorAll(".market-sort");
 const marketInputName = document.querySelector("#market-input-name");
 const marketInputClub = document.querySelector("#market-input-club");
 const marketInputPos = document.querySelector("#market-input-pos");
+const dailyList = document.querySelector("#daily-list");
+const dailyNote = document.querySelector("#daily-note");
+const managerLevelEl = document.querySelector("#manager-level");
+const managerXpEl = document.querySelector("#manager-xp");
+const achievementListEl = document.querySelector("#achievement-list");
+const seasonStatsEl = document.querySelector("#season-stats");
+const managerNoteEl = document.querySelector("#manager-note");
+const seasonResetButton = document.querySelector("#season-reset-btn");
+const cupStartButton = document.querySelector("#cup-start-btn");
+const competitionNoteEl = document.querySelector("#competition-note");
+const leagueTableEl = document.querySelector("#league-table");
+const cupStatusEl = document.querySelector("#cup-status");
 
 const ratingMismatchPenalty = 5;
 const injuryChance = 0.05;
@@ -71,6 +88,21 @@ const winStreakTarget = 5;
 const winStreakCoins = 1500;
 const winStreakPackId = "collision";
 const startingCoins = 1000;
+const dailyObjectivesKey = "fc-daily-objectives";
+const xpPerLevel = 1000;
+const managerClubName = "FC Ciro";
+const leagueTeamNames = [
+  managerClubName,
+  "Real Aurora",
+  "Union Titan",
+  "Atletico Norte",
+  "Sporting Cometa",
+  "Rayo Central",
+  "Academia Sur",
+  "Lobos City",
+  "Fenix Unido",
+  "Dragon FC",
+];
 if (coinAmount) coinAmount.textContent = String(startingCoins);
 
 let isResettingBankrupt = false;
@@ -143,6 +175,397 @@ const setWinStreak = (value) => {
   } catch (error) {
     console.error(error);
   }
+};
+
+const dailyObjectiveDefs = [
+  { key: "matches", label: "Juega 3 partidos", target: 3, reward: 900 },
+  { key: "buys", label: "Compra 1 jugador", target: 1, reward: 600 },
+  { key: "packs", label: "Abre 1 sobre", target: 1, reward: 700 },
+];
+
+let dailyObjectivesState = null;
+
+const getTodayKey = () => new Date().toISOString().slice(0, 10);
+
+const createDailyObjectivesState = () => ({
+  date: getTodayKey(),
+  counters: { matches: 0, buys: 0, packs: 0 },
+  claimed: { matches: false, buys: false, packs: false },
+});
+
+const persistDailyObjectives = () => {
+  if (!dailyObjectivesState) return;
+  try {
+    localStorage.setItem(dailyObjectivesKey, JSON.stringify(dailyObjectivesState));
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const ensureDailyObjectivesState = () => {
+  const today = getTodayKey();
+  if (dailyObjectivesState?.date === today) return;
+  try {
+    const raw = localStorage.getItem(dailyObjectivesKey);
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (parsed?.date === today && parsed?.counters && parsed?.claimed) {
+      dailyObjectivesState = parsed;
+      return;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+  dailyObjectivesState = createDailyObjectivesState();
+  persistDailyObjectives();
+};
+
+const renderDailyObjectives = () => {
+  ensureDailyObjectivesState();
+  if (!dailyList) return;
+  dailyList.innerHTML = dailyObjectiveDefs
+    .map((objective) => {
+      const current = Number(dailyObjectivesState.counters[objective.key]) || 0;
+      const done = Boolean(dailyObjectivesState.claimed[objective.key]);
+      return `<div class="daily-item ${done ? "done" : ""}">${done ? "✓" : "•"} ${objective.label} (${Math.min(current, objective.target)}/${objective.target}) +${objective.reward}</div>`;
+    })
+    .join("");
+  if (dailyNote && !dailyNote.textContent.trim()) {
+    dailyNote.textContent = "Completa objetivos para ganar monedas extra.";
+  }
+};
+
+const updateDailyObjectives = (objectiveKey, amount = 1) => {
+  ensureDailyObjectivesState();
+  if (!dailyObjectivesState.counters[objectiveKey] && dailyObjectivesState.counters[objectiveKey] !== 0) return;
+  dailyObjectivesState.counters[objectiveKey] = Math.max(
+    0,
+    (Number(dailyObjectivesState.counters[objectiveKey]) || 0) + amount
+  );
+  const newlyCompleted = [];
+  dailyObjectiveDefs.forEach((objective) => {
+    if (dailyObjectivesState.claimed[objective.key]) return;
+    const current = Number(dailyObjectivesState.counters[objective.key]) || 0;
+    if (current >= objective.target) {
+      dailyObjectivesState.claimed[objective.key] = true;
+      newlyCompleted.push(objective);
+    }
+  });
+  persistDailyObjectives();
+  if (newlyCompleted.length) {
+    const reward = newlyCompleted.reduce((sum, objective) => sum + objective.reward, 0);
+    addCoins(reward);
+    if (dailyNote) {
+      dailyNote.textContent = `Objetivo completado: +${reward} monedas.`;
+    }
+  }
+  renderDailyObjectives();
+};
+
+const clearDailyObjectives = () => {
+  dailyObjectivesState = createDailyObjectivesState();
+  persistDailyObjectives();
+  if (dailyNote) dailyNote.textContent = "Objetivos reiniciados.";
+  renderDailyObjectives();
+};
+
+const createLeagueTeam = (name) => ({
+  name,
+  p: 0,
+  w: 0,
+  d: 0,
+  l: 0,
+  gf: 0,
+  ga: 0,
+  pts: 0,
+});
+
+const getGoalDiff = (team) => (Number(team.gf) || 0) - (Number(team.ga) || 0);
+
+const sortLeagueTable = (table) =>
+  [...table].sort((a, b) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    const diff = getGoalDiff(b) - getGoalDiff(a);
+    if (diff !== 0) return diff;
+    if ((b.gf || 0) !== (a.gf || 0)) return (b.gf || 0) - (a.gf || 0);
+    return a.name.localeCompare(b.name, "es");
+  });
+
+const applyLeagueResult = (table, homeName, awayName, homeGoals, awayGoals) => {
+  const home = table.find((team) => team.name === homeName);
+  const away = table.find((team) => team.name === awayName);
+  if (!home || !away) return;
+  const hg = Math.max(0, Math.round(Number(homeGoals) || 0));
+  const ag = Math.max(0, Math.round(Number(awayGoals) || 0));
+  home.p += 1;
+  away.p += 1;
+  home.gf += hg;
+  home.ga += ag;
+  away.gf += ag;
+  away.ga += hg;
+  if (hg > ag) {
+    home.w += 1;
+    away.l += 1;
+    home.pts += 3;
+    return;
+  }
+  if (hg < ag) {
+    away.w += 1;
+    home.l += 1;
+    away.pts += 3;
+    return;
+  }
+  home.d += 1;
+  away.d += 1;
+  home.pts += 1;
+  away.pts += 1;
+};
+
+const createLeagueState = () => {
+  const opponents = leagueTeamNames.filter((name) => name !== managerClubName);
+  const firstRound = shuffle(opponents);
+  const secondRound = shuffle(opponents);
+  return {
+    active: true,
+    matchday: 1,
+    totalMatchdays: 18,
+    fixtures: [...firstRound, ...secondRound],
+    table: leagueTeamNames.map((name) => createLeagueTeam(name)),
+    champion: null,
+  };
+};
+
+const createCupState = () => ({
+  active: false,
+  round: null,
+  opponent: null,
+  status: "idle",
+  history: [],
+});
+
+const achievementDefs = [
+  { key: "first-win", label: "Primera victoria", reward: 500, check: (state) => state.stats.wins >= 1 },
+  { key: "veteran-25", label: "25 partidos", reward: 1200, check: (state) => state.stats.played >= 25 },
+  { key: "rich-50k", label: "Caja fuerte", reward: 1500, check: () => getCoins() >= 50000 },
+  { key: "collector-30", label: "Coleccionista", reward: 1200, check: () => players.length >= 30 },
+];
+
+const createProgressState = () => ({
+  xp: 0,
+  achievements: [],
+  stats: {
+    played: 0,
+    wins: 0,
+    draws: 0,
+    losses: 0,
+    goalsFor: 0,
+    goalsAgainst: 0,
+    coinsEarned: 0,
+    coinsSpent: 0,
+  },
+  season: createLeagueState(),
+  cup: createCupState(),
+});
+
+let progressState = createProgressState();
+
+const getManagerLevel = () => 1 + Math.floor((Number(progressState.xp) || 0) / xpPerLevel);
+
+const addManagerXp = (amount) => {
+  const safeAmount = Math.max(0, Math.round(Number(amount) || 0));
+  if (!safeAmount) return;
+  progressState.xp = Math.max(0, (Number(progressState.xp) || 0) + safeAmount);
+};
+
+const renderManagerProgress = () => {
+  const level = getManagerLevel();
+  const xp = Number(progressState.xp) || 0;
+  const xpInLevel = xp % xpPerLevel;
+  if (managerLevelEl) managerLevelEl.textContent = `Manager Nivel ${level}`;
+  if (managerXpEl) managerXpEl.textContent = `XP ${xpInLevel}/${xpPerLevel}`;
+  if (achievementListEl) {
+    const unlockedLabels = achievementDefs
+      .filter((def) => progressState.achievements.includes(def.key))
+      .map((def) => `<span class="achievement-badge">${def.label}</span>`);
+    achievementListEl.innerHTML = unlockedLabels.length ? unlockedLabels.join("") : "<span class=\"achievement-badge\">Sin logros aun</span>";
+  }
+  if (seasonStatsEl) {
+    const stats = progressState.stats;
+    seasonStatsEl.innerHTML = `
+      <span>Partidos: ${stats.played}</span>
+      <span>Victorias: ${stats.wins}</span>
+      <span>Empates: ${stats.draws}</span>
+      <span>Derrotas: ${stats.losses}</span>
+      <span>GF: ${stats.goalsFor}</span>
+      <span>GC: ${stats.goalsAgainst}</span>
+      <span>+Monedas: ${stats.coinsEarned}</span>
+      <span>-Monedas: ${stats.coinsSpent}</span>
+    `;
+  }
+  if (managerNoteEl && !managerNoteEl.textContent.trim()) {
+    managerNoteEl.textContent = "Gana partidos y completa hitos para subir de nivel.";
+  }
+};
+
+const renderCompetition = () => {
+  const season = progressState.season;
+  if (leagueTableEl && season?.table?.length) {
+    const sorted = sortLeagueTable(season.table);
+    const header = "<div class=\"league-row\"><strong>#</strong><strong>Equipo</strong><strong>Pts</strong><strong>DG</strong><strong>PJ</strong></div>";
+    const rows = sorted
+      .map((team, index) => {
+        const isMe = team.name === managerClubName;
+        return `<div class="league-row ${isMe ? "me" : ""}"><span>${index + 1}</span><span>${team.name}</span><span>${team.pts}</span><span>${getGoalDiff(team)}</span><span>${team.p}</span></div>`;
+      })
+      .join("");
+    leagueTableEl.innerHTML = `${header}${rows}`;
+  }
+  if (cupStatusEl) {
+    const cup = progressState.cup;
+    if (!cup?.active && cup?.status !== "won" && cup?.status !== "eliminated") {
+      cupStatusEl.textContent = "Torneo: inactivo.";
+    } else if (cup?.active) {
+      cupStatusEl.textContent = `Torneo ${cup.round}: proximo rival ${cup.opponent}.`;
+    } else if (cup?.status === "won") {
+      cupStatusEl.textContent = "Torneo: campeon.";
+    } else if (cup?.status === "eliminated") {
+      cupStatusEl.textContent = "Torneo: eliminado.";
+    }
+  }
+  if (competitionNoteEl && !competitionNoteEl.textContent.trim()) {
+    const day = progressState.season?.matchday || 1;
+    const total = progressState.season?.totalMatchdays || 18;
+    competitionNoteEl.textContent = `Liga jornada ${Math.min(day, total)}/${total}. Cada partido de Jugar avanza competiciones.`;
+  }
+};
+
+const startNewSeason = () => {
+  progressState.season = createLeagueState();
+  competitionNoteEl.textContent = "Nueva liga iniciada.";
+  renderCompetition();
+  persistState();
+};
+
+const startCup = () => {
+  if (progressState.cup?.active) {
+    if (competitionNoteEl) competitionNoteEl.textContent = "El torneo ya esta en curso.";
+    return;
+  }
+  const opponents = shuffle(leagueTeamNames.filter((name) => name !== managerClubName));
+  progressState.cup = {
+    active: true,
+    round: "QF",
+    opponent: opponents[0],
+    status: "active",
+    history: [],
+  };
+  if (competitionNoteEl) competitionNoteEl.textContent = `Torneo iniciado. Rival de cuartos: ${opponents[0]}.`;
+  renderCompetition();
+  persistState();
+};
+
+const advanceSeasonWithMatch = (outcome, goalsFor, goalsAgainst) => {
+  const season = progressState.season;
+  if (!season?.active) return;
+  const fixtureIndex = Math.max(0, (season.matchday || 1) - 1);
+  const opponent = season.fixtures?.[fixtureIndex] || leagueTeamNames.filter((name) => name !== managerClubName)[0];
+  applyLeagueResult(season.table, managerClubName, opponent, goalsFor, goalsAgainst);
+  const others = shuffle(leagueTeamNames.filter((name) => name !== managerClubName && name !== opponent));
+  for (let i = 0; i + 1 < others.length; i += 2) {
+    const home = others[i];
+    const away = others[i + 1];
+    const hg = randomInt(0, 4);
+    const ag = randomInt(0, 4);
+    applyLeagueResult(season.table, home, away, hg, ag);
+  }
+  season.matchday += 1;
+  if (season.matchday > season.totalMatchdays) {
+    season.active = false;
+    const champion = sortLeagueTable(season.table)[0];
+    season.champion = champion?.name || null;
+    if (season.champion === managerClubName) {
+      addCoins(5000);
+      addManagerXp(900);
+      if (competitionNoteEl) competitionNoteEl.textContent = "Liga finalizada: campeon. +5000 monedas.";
+    } else if (competitionNoteEl) {
+      competitionNoteEl.textContent = `Liga finalizada. Campeon: ${season.champion}.`;
+    }
+  } else if (competitionNoteEl) {
+    const next = season.fixtures?.[season.matchday - 1] || "Rival";
+    competitionNoteEl.textContent = `Liga jornada ${season.matchday}/${season.totalMatchdays}. Proximo rival: ${next}.`;
+  }
+  renderCompetition();
+};
+
+const advanceCupWithMatch = (outcome, goalsFor, goalsAgainst) => {
+  const cup = progressState.cup;
+  if (!cup?.active) return;
+  let effectiveOutcome = outcome;
+  if (outcome === "draw") {
+    effectiveOutcome = Math.random() < 0.5 ? "win" : "lose";
+  }
+  cup.history.push({ round: cup.round, opponent: cup.opponent, goalsFor, goalsAgainst, outcome: effectiveOutcome });
+  if (effectiveOutcome !== "win") {
+    cup.active = false;
+    cup.status = "eliminated";
+    cup.opponent = null;
+    if (competitionNoteEl) competitionNoteEl.textContent = "Torneo: quedaste eliminado.";
+    renderCompetition();
+    return;
+  }
+  if (cup.round === "QF") {
+    cup.round = "SF";
+    cup.opponent = shuffle(leagueTeamNames.filter((name) => name !== managerClubName))[0];
+    if (competitionNoteEl) competitionNoteEl.textContent = `Torneo: avanzas a semifinal vs ${cup.opponent}.`;
+  } else if (cup.round === "SF") {
+    cup.round = "FINAL";
+    cup.opponent = shuffle(leagueTeamNames.filter((name) => name !== managerClubName))[0];
+    if (competitionNoteEl) competitionNoteEl.textContent = `Torneo: avanzas a la final vs ${cup.opponent}.`;
+  } else {
+    cup.active = false;
+    cup.status = "won";
+    cup.opponent = null;
+    addCoins(7000);
+    addManagerXp(1100);
+    if (competitionNoteEl) competitionNoteEl.textContent = "Torneo ganado. +7000 monedas.";
+  }
+  renderCompetition();
+};
+
+const tryUnlockAchievements = () => {
+  let reward = 0;
+  const newlyUnlocked = [];
+  achievementDefs.forEach((def) => {
+    if (progressState.achievements.includes(def.key)) return;
+    if (!def.check(progressState)) return;
+    progressState.achievements.push(def.key);
+    reward += def.reward;
+    newlyUnlocked.push(def.label);
+  });
+  if (reward > 0) {
+    addCoins(reward);
+    if (managerNoteEl) managerNoteEl.textContent = `Logro desbloqueado (${newlyUnlocked.join(", ")}): +${reward} monedas.`;
+  }
+};
+
+const registerCoinDelta = (delta) => {
+  const value = Math.round(Number(delta) || 0);
+  if (!value) return;
+  if (value > 0) progressState.stats.coinsEarned += value;
+  if (value < 0) progressState.stats.coinsSpent += Math.abs(value);
+};
+
+const registerMatchStats = (resultType, goalsFor, goalsAgainst) => {
+  progressState.stats.played += 1;
+  progressState.stats.goalsFor += Math.max(0, Number(goalsFor) || 0);
+  progressState.stats.goalsAgainst += Math.max(0, Number(goalsAgainst) || 0);
+  if (resultType === "win") progressState.stats.wins += 1;
+  if (resultType === "draw") progressState.stats.draws += 1;
+  if (resultType === "lose") progressState.stats.losses += 1;
+  if (resultType === "win") addManagerXp(150);
+  if (resultType === "draw") addManagerXp(80);
+  if (resultType === "lose") addManagerXp(45);
+  tryUnlockAchievements();
+  renderManagerProgress();
 };
 
 const buildClubFromPool = (pool, lineupCount) => {
@@ -257,6 +680,84 @@ const clearSwapSelection = () => {
 const setSwapSelection = (selection) => {
   selectedSwap = selection;
   updateSelectedSlotUI();
+};
+
+const getInitialClubPool = () => (pocoPlayers.length ? pocoPlayers : databasePlayers);
+
+const refreshAllViews = () => {
+  syncLineupCards();
+  players.filter((player) => player.inLineup).forEach((player) => {
+    updateDorsalDisplay(player.id, player.number);
+  });
+  clearSwapSelection();
+  renderClub();
+  renderDorsalList();
+  renderPlantillaBench();
+  renderMarket();
+  updateTeamRating();
+  renderManagerProgress();
+  renderCompetition();
+};
+
+const applyRestoredState = (restoredState) => {
+  if (!restoredState?.players?.length) return false;
+  players = restoredState.players;
+  progressState = restoredState?.progress ? restoredState.progress : createProgressState();
+  marketPlayers = databasePlayers.filter((player) => !players.some((item) => item.dbId === player.dbId));
+  if (restoredState?.coins !== null && Number.isFinite(restoredState?.coins) && coinAmount) {
+    coinAmount.textContent = String(restoredState.coins);
+  }
+  if (restoredState?.winStreak !== null && Number.isFinite(restoredState?.winStreak)) {
+    setWinStreak(restoredState.winStreak);
+  }
+  if (coinDelta) coinDelta.textContent = "";
+  refreshAllViews();
+  tryUnlockAchievements();
+  return true;
+};
+
+const autoBuildBestLineup = () => {
+  if (!players.length) return;
+  const available = [...players];
+  const slotIds = Array.from({ length: 11 }, (_, index) => index + 1);
+  const numberByDbId = new Map(players.map((player) => [player.dbId, player.number]));
+  const lineup = slotIds
+    .map((slot) => {
+      if (!available.length) return null;
+      const slotId = `p${slot}`;
+      const slotPos = document.querySelector(`.player[data-player="${slotId}"]`)?.dataset.slotPos?.trim() || "";
+      let bestIndex = -1;
+      let bestScore = -9999;
+      available.forEach((candidate, index) => {
+        const unavailablePenalty = candidate.injuryMatches > 0 || candidate.redCardMatches > 0 ? 1000 : 0;
+        const mismatchPenalty = slotPos && candidate.pos !== slotPos ? ratingMismatchPenalty : 0;
+        const score = (Number(candidate.rating) || 0) - mismatchPenalty - unavailablePenalty;
+        if (score > bestScore) {
+          bestScore = score;
+          bestIndex = index;
+        }
+      });
+      if (bestIndex < 0) return null;
+      const picked = available.splice(bestIndex, 1)[0];
+      return {
+        ...picked,
+        id: slotId,
+        inLineup: true,
+        slot,
+        number: numberByDbId.get(picked.dbId) ?? defaultNumbers[slot - 1] ?? null,
+      };
+    })
+    .filter(Boolean);
+  const bench = available.map((player) => ({
+    ...player,
+    id: player.dbId,
+    inLineup: false,
+    slot: null,
+  }));
+  players = [...lineup, ...bench];
+  refreshAllViews();
+  persistState();
+  if (plantillaNote) plantillaNote.textContent = "Alineacion automatica aplicada.";
 };
 
 const togglePlantillaPosInput = () => {
@@ -386,6 +887,83 @@ marketButton?.addEventListener("click", (event) => {
 marketBackButton?.addEventListener("click", (event) => {
   event.preventDefault();
   showScreen(homeScreen, marketScreen);
+});
+
+seasonResetButton?.addEventListener("click", (event) => {
+  event.preventDefault();
+  startNewSeason();
+});
+
+cupStartButton?.addEventListener("click", (event) => {
+  event.preventDefault();
+  startCup();
+});
+
+autoLineupButton?.addEventListener("click", (event) => {
+  event.preventDefault();
+  autoBuildBestLineup();
+});
+
+saveProgressButton?.addEventListener("click", (event) => {
+  event.preventDefault();
+  persistState();
+  persistDailyObjectives();
+  if (dailyNote) dailyNote.textContent = "Partida guardada.";
+});
+
+loadProgressButton?.addEventListener("click", (event) => {
+  event.preventDefault();
+  if (!databasePlayers.length) return;
+  const restored = restoreState(databasePlayers);
+  if (!restored || !applyRestoredState(restored)) {
+    if (dailyNote) dailyNote.textContent = "No hay partida guardada.";
+    return;
+  }
+  renderDailyObjectives();
+  persistState();
+  if (dailyNote) dailyNote.textContent = "Partida cargada.";
+});
+
+deleteProgressButton?.addEventListener("click", (event) => {
+  event.preventDefault();
+  const confirmed = window.confirm("Se borrara el guardado manual. ¿Continuar?");
+  if (!confirmed) return;
+  try {
+    localStorage.removeItem(storageKey);
+    localStorage.removeItem(dailyObjectivesKey);
+  } catch (error) {
+    console.error(error);
+  }
+  setWinStreak(0);
+  progressState = createProgressState();
+  renderManagerProgress();
+  clearDailyObjectives();
+  if (dailyNote) dailyNote.textContent = "Guardado borrado.";
+});
+
+resetProgressButton?.addEventListener("click", (event) => {
+  event.preventDefault();
+  if (!databasePlayers.length) return;
+  const confirmed = window.confirm("Se reiniciara toda la partida. Volveras a empezar con 1000 monedas. ¿Continuar?");
+  if (!confirmed) return;
+  try {
+    localStorage.removeItem(storageKey);
+    localStorage.removeItem(dailyObjectivesKey);
+  } catch (error) {
+    console.error(error);
+  }
+  setWinStreak(0);
+  progressState = createProgressState();
+  players = buildWorstByPositionClub(getInitialClubPool());
+  marketPlayers = databasePlayers.filter((player) => !players.some((item) => item.dbId === player.dbId));
+  refreshAllViews();
+  if (coinAmount) coinAmount.textContent = String(startingCoins);
+  if (coinDelta) coinDelta.textContent = "";
+  clearDailyObjectives();
+  if (managerNoteEl) managerNoteEl.textContent = "Temporada reiniciada.";
+  if (clubNote) clubNote.textContent = "Partida reiniciada.";
+  if (marketNote) marketNote.textContent = "Empezaste de cero con 1000 monedas.";
+  persistState();
 });
 
 musicToggleButton?.addEventListener("click", (event) => {
@@ -645,7 +1223,11 @@ const addCoins = (amount) => {
   const total = current + amount;
   if (coinAmount) coinAmount.textContent = String(total);
   if (coinDelta) coinDelta.textContent = amount ? `${amount > 0 ? "+" : ""}${amount}` : "";
+  registerCoinDelta(amount);
+  tryUnlockAchievements();
+  renderManagerProgress();
   if (total <= 0) handleBankrupt();
+  persistState();
 };
 
 const hidePanels = () => {
@@ -738,6 +1320,7 @@ const resetClubToWorst = () => {
   renderDorsalList();
   renderPlantillaBench();
   renderMarket();
+  renderDailyObjectives();
   updateTeamRating();
   persistState();
 };
@@ -761,6 +1344,9 @@ const openResult = (rivalId, rivalName, difficulty, rivalRating, winCoins) => {
   let left = 50;
   let right = 50;
   let reward = 0;
+  let outcome = "draw";
+  let homeGoals = 0;
+  let awayGoals = 0;
   const injuryNote = handleMatchIncidents();
 
   hidePanels();
@@ -769,7 +1355,8 @@ const openResult = (rivalId, rivalName, difficulty, rivalRating, winCoins) => {
     left = Math.floor(51 + Math.random() * 30);
     right = 100 - left;
     reward = winCoins;
-    const [homeGoals, awayGoals] = createScore("win");
+    [homeGoals, awayGoals] = createScore("win");
+    outcome = "win";
     let streak = getWinStreak() + 1;
     let streakText = "";
     if (streak >= winStreakTarget) {
@@ -790,7 +1377,8 @@ const openResult = (rivalId, rivalName, difficulty, rivalRating, winCoins) => {
     left = 50;
     right = 50;
     reward = 500;
-    const [homeGoals, awayGoals] = createScore("draw");
+    [homeGoals, awayGoals] = createScore("draw");
+    outcome = "draw";
     setWinStreak(0);
     setPanel(drawPanel, "draw", rivalName, left, right, `Premio: ${reward} monedas${injuryNote}`);
     setScore("draw", homeGoals, awayGoals);
@@ -798,12 +1386,17 @@ const openResult = (rivalId, rivalName, difficulty, rivalRating, winCoins) => {
     right = Math.floor(51 + Math.random() * 30);
     left = 100 - right;
     reward = -200;
-    const [homeGoals, awayGoals] = createScore("lose");
+    [homeGoals, awayGoals] = createScore("lose");
+    outcome = "lose";
     setWinStreak(0);
     setPanel(losePanel, "lose", rivalName, left, right, `Premio: ${reward} monedas${injuryNote}`);
     setScore("lose", homeGoals, awayGoals);
   }
+  registerMatchStats(outcome, homeGoals, awayGoals);
+  advanceSeasonWithMatch(outcome, homeGoals, awayGoals);
+  advanceCupWithMatch(outcome, homeGoals, awayGoals);
   addCoins(reward);
+  updateDailyObjectives("matches", 1);
 };
 
 resultCloseButtons.forEach((button) => {
@@ -971,6 +1564,9 @@ const toPlayerRecord = (raw, index, prefix, fallbackClub) => {
 const persistState = () => {
   try {
     const payload = {
+      coins: Number.isFinite(getCoins()) ? getCoins() : startingCoins,
+      winStreak: getWinStreak(),
+      progress: progressState,
       players: players.map(({ dbId, id, inLineup, number, injuryMatches, redCardMatches }) => ({
         dbId,
         inLineup,
@@ -993,21 +1589,103 @@ const restoreState = (records) => {
     const parsed = JSON.parse(raw);
     if (!parsed || !Array.isArray(parsed.players)) return null;
     const byId = new Map(records.map((player) => [player.dbId, player]));
+    const usedDbIds = new Set();
+    const usedSlots = new Set();
     const restored = parsed.players
       .map((item) => {
+        if (usedDbIds.has(item.dbId)) return null;
         const base = byId.get(item.dbId);
         if (!base) return null;
+        usedDbIds.add(item.dbId);
+        const rawSlot = Number(item.slot);
+        const inLineup = Boolean(item.inLineup);
+        const normalizedSlot =
+          inLineup &&
+          Number.isInteger(rawSlot) &&
+          rawSlot >= 1 &&
+          rawSlot <= 11 &&
+          !usedSlots.has(rawSlot)
+            ? rawSlot
+            : null;
+        if (normalizedSlot) usedSlots.add(normalizedSlot);
         return {
           ...base,
-          inLineup: Boolean(item.inLineup),
+          id: normalizedSlot ? `p${normalizedSlot}` : base.dbId,
+          inLineup: Boolean(normalizedSlot),
           number: Number.isFinite(Number(item.number)) ? Number(item.number) : null,
-          slot: Number.isFinite(Number(item.slot)) ? Number(item.slot) : null,
+          slot: normalizedSlot,
           injuryMatches: Number.isFinite(Number(item.injuryMatches)) ? Number(item.injuryMatches) : 0,
           redCardMatches: Number.isFinite(Number(item.redCardMatches)) ? Number(item.redCardMatches) : 0,
         };
       })
       .filter(Boolean);
-    return restored.length ? restored : null;
+    if (!restored.length) return null;
+    const coins = Number(parsed.coins);
+    const normalizedCoins = Number.isFinite(coins) ? Math.max(0, Math.round(coins)) : null;
+    const winStreak = Number(parsed.winStreak);
+    const normalizedWinStreak = Number.isFinite(winStreak) ? Math.max(0, Math.round(winStreak)) : null;
+    const baseProgress = createProgressState();
+    const rawProgress = parsed.progress;
+    const rawSeason = rawProgress?.season;
+    const seasonTable = Array.isArray(rawSeason?.table)
+      ? rawSeason.table
+          .filter((team) => team && leagueTeamNames.includes(team.name))
+          .map((team) => ({
+            name: team.name,
+            p: Math.max(0, Math.round(Number(team.p) || 0)),
+            w: Math.max(0, Math.round(Number(team.w) || 0)),
+            d: Math.max(0, Math.round(Number(team.d) || 0)),
+            l: Math.max(0, Math.round(Number(team.l) || 0)),
+            gf: Math.max(0, Math.round(Number(team.gf) || 0)),
+            ga: Math.max(0, Math.round(Number(team.ga) || 0)),
+            pts: Math.max(0, Math.round(Number(team.pts) || 0)),
+          }))
+      : [];
+    leagueTeamNames.forEach((name) => {
+      if (!seasonTable.some((team) => team.name === name)) seasonTable.push(createLeagueTeam(name));
+    });
+    const totalMatchdays = 18;
+    const normalizedProgress = rawProgress && typeof rawProgress === "object"
+      ? {
+          xp: Math.max(0, Math.round(Number(rawProgress.xp) || 0)),
+          achievements: Array.isArray(rawProgress.achievements)
+            ? rawProgress.achievements.filter((key) => achievementDefs.some((def) => def.key === key))
+            : [],
+          stats: {
+            played: Math.max(0, Math.round(Number(rawProgress.stats?.played) || 0)),
+            wins: Math.max(0, Math.round(Number(rawProgress.stats?.wins) || 0)),
+            draws: Math.max(0, Math.round(Number(rawProgress.stats?.draws) || 0)),
+            losses: Math.max(0, Math.round(Number(rawProgress.stats?.losses) || 0)),
+            goalsFor: Math.max(0, Math.round(Number(rawProgress.stats?.goalsFor) || 0)),
+            goalsAgainst: Math.max(0, Math.round(Number(rawProgress.stats?.goalsAgainst) || 0)),
+            coinsEarned: Math.max(0, Math.round(Number(rawProgress.stats?.coinsEarned) || 0)),
+            coinsSpent: Math.max(0, Math.round(Number(rawProgress.stats?.coinsSpent) || 0)),
+          },
+          season: {
+            active: Boolean(rawSeason?.active),
+            matchday: Math.max(1, Math.min(totalMatchdays + 1, Math.round(Number(rawSeason?.matchday) || 1))),
+            totalMatchdays,
+            fixtures: Array.isArray(rawSeason?.fixtures) && rawSeason.fixtures.length === totalMatchdays
+              ? rawSeason.fixtures.map((name) => (leagueTeamNames.includes(name) && name !== managerClubName ? name : leagueTeamNames[1]))
+              : createLeagueState().fixtures,
+            table: seasonTable,
+            champion: leagueTeamNames.includes(rawSeason?.champion) ? rawSeason.champion : null,
+          },
+          cup: {
+            active: Boolean(rawProgress.cup?.active),
+            round: ["QF", "SF", "FINAL"].includes(rawProgress.cup?.round) ? rawProgress.cup.round : null,
+            opponent: leagueTeamNames.includes(rawProgress.cup?.opponent) ? rawProgress.cup.opponent : null,
+            status: ["idle", "active", "won", "eliminated"].includes(rawProgress.cup?.status) ? rawProgress.cup.status : "idle",
+            history: Array.isArray(rawProgress.cup?.history) ? rawProgress.cup.history.slice(-6) : [],
+          },
+        }
+      : baseProgress;
+    return {
+      players: restored,
+      coins: normalizedCoins,
+      winStreak: normalizedWinStreak,
+      progress: normalizedProgress,
+    };
   } catch (error) {
     console.error(error);
     return null;
@@ -1098,14 +1776,14 @@ const updateSelectedSlotUI = () => {
   }
 };
 
-const shuffle = (list) => {
+function shuffle(list) {
   const array = [...list];
   for (let i = array.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
-};
+}
 
 const getTierByRating = (rating) => {
   const value = Number(rating) || 0;
@@ -1120,18 +1798,19 @@ const initPlayersFromDatabase = ({ base = [], poco = [], legends = [] }) => {
   pocoPlayers = poco.map((raw, index) => toPlayerRecord(raw, index, "poco", "Libre"));
   legendPlayers = legends.map((raw, index) => toPlayerRecord(raw, index, "legend", "Leyendas"));
   databasePlayers = [...basePlayers, ...pocoPlayers, ...legendPlayers];
-  const initialPool = pocoPlayers.length ? pocoPlayers : databasePlayers;
-  players = buildWorstByPositionClub(initialPool);
-  marketPlayers = databasePlayers.filter((player) => !players.some((item) => item.dbId === player.dbId));
-  syncLineupCards();
-  players.filter((player) => player.inLineup).forEach((player) => {
-    updateDorsalDisplay(player.id, player.number);
-  });
-  renderClub();
-  renderDorsalList();
-  renderPlantillaBench();
-  renderMarket();
-  updateTeamRating();
+  const initialPool = getInitialClubPool();
+  const restoredState = restoreState(databasePlayers);
+  const loaded = applyRestoredState(restoredState);
+  if (!loaded) {
+    players = buildWorstByPositionClub(initialPool);
+    progressState = createProgressState();
+    marketPlayers = databasePlayers.filter((player) => !players.some((item) => item.dbId === player.dbId));
+    if (coinAmount) coinAmount.textContent = String(startingCoins);
+    setWinStreak(0);
+    refreshAllViews();
+  }
+  if (coinDelta) coinDelta.textContent = "";
+  renderDailyObjectives();
   persistState();
 };
 
@@ -1218,7 +1897,7 @@ const renderPlantillaBench = () => {
   plantillaBench.innerHTML = benchPlayers
     .map(
       (player) => `
-        <div class="plantilla-bench-card ${getTierByRating(player.rating) ?? ""}" data-id="${player.dbId}" draggable="true">
+        <div class="plantilla-bench-card ${getTierByRating(player.rating) ?? ""}" data-id="${player.dbId}" draggable="false">
           <div class="bench-tag">
             <span class="bench-pos">${player.pos}</span>
             <span class="bench-rating">${player.rating}</span>
@@ -1235,9 +1914,19 @@ const renderPlantillaBench = () => {
     if ((plantillaSearchQuery.trim() || plantillaPosQuery.trim()) && !benchPlayers.length) {
       plantillaNote.textContent = "No hay resultados para ese filtro.";
     } else {
-      plantillaNote.textContent = "Arrastra un jugador del club hacia una posicion del 11.";
+      plantillaNote.textContent = "Haz click en un jugador y luego en otro para intercambiar.";
     }
   }
+};
+
+const getSwapSelectionName = (selection) => {
+  if (!selection?.id) return "jugador";
+  if (selection.type === "lineup") {
+    const lineupPlayer = players.find((player) => player.inLineup && player.id === selection.id);
+    return lineupPlayer?.name || selection.id;
+  }
+  const benchPlayer = players.find((player) => player.dbId === selection.id);
+  return benchPlayer?.name || selection.id;
 };
 
 const swapIntoLineup = (benchDbId, forcedSlotId = null) => {
@@ -1322,6 +2011,9 @@ const handlePlantillaSwapClick = (event) => {
   if (!selection.id) return;
   if (!selectedSwap || selectedSwap.scope !== "plantilla") {
     setSwapSelection(selection);
+    if (plantillaNote) {
+      plantillaNote.textContent = `Seleccionado ${getSwapSelectionName(selection)}. Ahora elige otro para cambiar.`;
+    }
     return;
   }
   if (selectedSwap.type === selection.type && selectedSwap.id === selection.id) {
@@ -1340,6 +2032,8 @@ const handlePlantillaSwapClick = (event) => {
   }
   if (!swapped && plantillaNote) {
     plantillaNote.textContent = "No se pudo cambiar el jugador.";
+  } else if (swapped && plantillaNote) {
+    plantillaNote.textContent = "Intercambio realizado.";
   }
   clearSwapSelection();
 };
@@ -1516,7 +2210,11 @@ const awardStreakPackReward = () => {
   marketPlayers = marketPlayers.filter((item) => item.id !== player.id);
   renderClub();
   renderMarket();
+  addManagerXp(35);
+  tryUnlockAchievements();
+  renderManagerProgress();
   persistState();
+  updateDailyObjectives("packs", 1);
   return { packName, player };
 };
 
@@ -1566,6 +2264,9 @@ const getCoins = () => Number(coinAmount?.textContent || "0");
 const setCoins = (value, delta = 0) => {
   if (coinAmount) coinAmount.textContent = String(value);
   if (coinDelta) coinDelta.textContent = delta ? `${delta > 0 ? "+" : ""}${delta}` : "";
+  registerCoinDelta(delta);
+  tryUnlockAchievements();
+  renderManagerProgress();
   if (value <= 0) handleBankrupt();
 };
 
@@ -1637,7 +2338,11 @@ const buyPlayer = (playerId) => {
   renderMarket();
   renderClub();
   if (marketNote) marketNote.textContent = `Compraste a ${player.name}.`;
+  addManagerXp(25);
+  tryUnlockAchievements();
+  renderManagerProgress();
   persistState();
+  updateDailyObjectives("buys", 1);
 };
 
 const sellPlayer = (playerId) => {
@@ -1750,7 +2455,11 @@ document.addEventListener("click", (event) => {
   renderMarket();
   showStoreResult({ ...player, rarity });
   if (storeNote) storeNote.textContent = `Te salio ${player.name}.`;
+  addManagerXp(35);
+  tryUnlockAchievements();
+  renderManagerProgress();
   persistState();
+  updateDailyObjectives("packs", 1);
 });
 
 marketInputName?.addEventListener("input", (event) => {
